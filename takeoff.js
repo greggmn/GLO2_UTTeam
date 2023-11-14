@@ -1,5 +1,5 @@
 var colors = require("colors");
-var unsafeRequire = require("./utils/unsafeRequire");
+var unsafeRequire = require("./unsafeRequire");
 
 // Pour rendre node un peu plus souple pour l'exercice (ne jamais utiliser ailleurs)
 var unsafeRequire = function(m, stub){
@@ -23,7 +23,7 @@ var stub = {
 };
 
 var engine = unsafeRequire("./engine", stub);
-var command = unsafeRequire("./command", stub);
+var command = unsafeRequire("./Commande", stub);
 var radio = unsafeRequire("./radio", stub);
 var satellite1 = unsafeRequire("./satellite1", stub);
 var satellite2 = unsafeRequire("./satellite2", stub);
