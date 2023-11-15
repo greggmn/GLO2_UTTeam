@@ -1,7 +1,9 @@
 var Commande = {
     check: function(){
-    console.log("Commande Ready !")
-    return true
+        console.log("Commande Ready !")
+        console.log("Blue level checked".blue)
+
+        return true
     }
-    }
-    module.exports = Commande
+}
+module.exports = Commande
