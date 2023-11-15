@@ -1,1 +1,0 @@
-# GLO2_UTTeam
