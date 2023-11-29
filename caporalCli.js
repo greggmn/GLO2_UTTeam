@@ -1,6 +1,6 @@
 const fs = require('fs');
 const colors = require('colors');
-const VpfParser = require('./VpfParser.js');
+const CruParser = require('./CruParser.js');
 
 const vg = require('vega');
 const vegalite = require('vega-lite');
@@ -8,11 +8,11 @@ const vegalite = require('vega-lite');
 const cli = require("@caporal/core").default;
 
 cli
-	.version('vpf-parser-cli')
+	.version('Cru-parser-cli')
 	.version('0.07')
-	// check Vpf
-	.command('check', 'Check if <file> is a valid Vpf file')
-	.argument('<file>', 'The file to check with Vpf parser')
+	// check Cru
+	.command('check', 'Check if <file> is a valid Cru file')
+	.argument('<file>', 'The file to check with Cru parser')
 	.option('-s, --showSymbols', 'log the analyzed symbol at each step', { validator : cli.BOOLEAN, default: false })
 	.option('-t, --showTokenize', 'log the tokenization results', { validator: cli.BOOLEAN, default: false })
 	.action(({args, options, logger}) => {
@@ -21,14 +21,19 @@ cli
 			if (err) {
 				return logger.warn(err);
 			}
+	  
+			var analyzer = new CruParser(options.showTokenize, options.showSymbols);
 
-			var analyzer = new VpfParser(options.showTokenize, options.showSymbols);
 			analyzer.parse(data);
 
 			if(analyzer.errorCount === 0){
-				logger.info("The .vpf file is a valid vpf file".green);
+				logger.info("The .cru file is a valid cru file".green);
+				console.log("parsedUE:");
+				console.log(analyzer.parsedUE);
+				console.log("listUE:");
+				console.log(analyzer.listUE);
 			}else{
-				logger.info("The .vpf file contains error".red);
+				logger.info("The .cru file contains error".red);
 			}
 
 			logger.debug(analyzer.parsedPOI);
