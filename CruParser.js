@@ -116,7 +116,7 @@ CruParser.prototype.ue = function(input){
 // code = 2ALPHA 2DIGIT CRLF
 CruParser.prototype.code = function(input){
 	var curS = this.next(input);
-	if(matched = curS.match(/[A-Z][A-Z]\d\d/)){
+	if(matched = curS.match(/[A-Z]{1,4}\d{0,3}/)){
 		return matched[0];
 	}else{
 		this.errMsg("Invalid code", input);
@@ -158,7 +158,7 @@ CruParser.prototype.type = function(input){
 CruParser.prototype.nbplaces = function(input){
 	var curS = this.next(input);
 	console.log("curS=" + curS);
-	if(matched = curS.match(/\d{2,3}/)){
+	if(matched = curS.match(/\d{1,3}/)){
 		return matched[0];
 	}else{
 		this.errMsg("Invalid nombre de place", input);
@@ -191,7 +191,7 @@ CruParser.prototype.horaire = function(input){
 CruParser.prototype.groupe_cours = function(input){
 	var curS = this.next(input);
 	console.log("curS=" + curS);
-	if(matched = curS.match(/F\d/)){
+	if(matched = curS.match(/F\d|[A-Z]{1,2}/)){
 		return matched[0];
 	}else{
 		this.errMsg("Invalid groupe_cours", input);
