@@ -87,6 +87,7 @@ CruParser.prototype.expect = function(s, input){
 
 // <liste_ue> = *(<ue>)
 CruParser.prototype.listUE = function(input){
+	console.log(input);
 	this.ue(input);
 }
 
@@ -96,10 +97,10 @@ CruParser.prototype.ue = function(input){
 
 	//if(this.check("+", input)){
 		this.expect("", input);
-		var args = this.body(input);
-		var ue = new UE(args.code, []);
+		var args = this.code(input);
+		var ue = new UE(args, []);
 		while (input[0]!==""){
-			this.creneaux(input, ue);
+			var cren = this.creneaux(input, ue);
 		}
 		this.parsedUE.push(ue);
 		if(input.length > 1){
@@ -112,12 +113,6 @@ CruParser.prototype.ue = function(input){
 }
 
 
-CruParser.prototype.body = function(input){
-	var code = this.code(input);
-	return {code:code};
-}
-
-
 // code = 2ALPHA 2DIGIT CRLF
 CruParser.prototype.code = function(input){
 	var curS = this.next(input);
@@ -125,33 +120,33 @@ CruParser.prototype.code = function(input){
 		return matched[0];
 	}else{
 		this.errMsg("Invalid code", input);
+		return 0;
 	}
 }
 
 
+
 //creneau = “1” “,” type “,”nbplaces“,” jour “,” horaire “,” groupe_cours “,” salle “//” CRLF
 CruParser.prototype.creneaux = function (input, curUE){
-	var args = this.bodyCreneau(input);
-	var creneau = new Creneau(args.type, args.nbplaces, args.jour, args.horaire, args.groupe_cours, args.salle );
-	curUE.addCreneau(creneau);
-}
-
-
-CruParser.prototype.bodyCreneau = function(input){
+	
 	var ty = this.type(input);
 	var nbP = this.nbplaces(input);
 	var j = this.jour(input);
 	var h = this.horaire(input);
 	var gC = this.groupe_cours(input);
 	var s = this.salle(input);
+	
+	var creneau = new Creneau(ty, nbP, j, h, gC, s);
+	curUE.addCreneau(creneau);
 
-	return { type:ty, nbplaces:nbP, jour:j, horaire:h, groupe_cours:gC, salle:s};
 }
 
 
 // type = (“C”/”D”/”T’) 1DIGIT
 CruParser.prototype.type = function(input){
 	var curS = this.next(input);
+	var curS = this.next(input);
+	console.log("curS=" + curS);
 	if(matched = curS.match(/[CDT]\d/)){
 		return matched[0];
 	}else{
@@ -162,6 +157,7 @@ CruParser.prototype.type = function(input){
 // nbplaces = “P=” 2*3DIGIT
 CruParser.prototype.nbplaces = function(input){
 	var curS = this.next(input);
+	console.log("curS=" + curS);
 	if(matched = curS.match(/\d{2,3}/)){
 		return matched[0];
 	}else{
@@ -172,6 +168,7 @@ CruParser.prototype.nbplaces = function(input){
 // jour = “H=” (“L”/”MA”/”ME”/”J”/”V”/”S”) WSP
 CruParser.prototype.jour = function(input){
 	var curS = this.next(input);
+	console.log("curS=" + curS);
 	if(matched = curS.match(/(L|MA|ME|J|V|S)/)){
 		return matched[0];
 	}else{
@@ -182,6 +179,7 @@ CruParser.prototype.jour = function(input){
 // horaire = 1*2DIGIT “:” 2DIGIT “-” 1*2DIGIT “:” 2DIGIT
 CruParser.prototype.horaire = function(input){
 	var curS = this.next(input);
+	console.log("curS=" + curS);
 	if(matched = curS.match(/\d{1,2}:\d{2}-\d{1,2}:\d{2}/)){
 		return matched[0];
 	}else{
@@ -192,6 +190,7 @@ CruParser.prototype.horaire = function(input){
 // groupe_cours = “F” 1DIGIT
 CruParser.prototype.groupe_cours = function(input){
 	var curS = this.next(input);
+	console.log("curS=" + curS);
 	if(matched = curS.match(/F\d/)){
 		return matched[0];
 	}else{
@@ -202,13 +201,14 @@ CruParser.prototype.groupe_cours = function(input){
 // salle = “S= (1ALPHA 3DIGIT)/(%s”EXT” 1DIGIT)
 CruParser.prototype.salle = function(input){
 	var curS = this.next(input);
-	if(matched = curS.match(/([A-Za-z]\d{3}|EXT\d)/)){
+	matched = curS.match(/([A-Za-z]\d{3}|EXT\d)/)
+	console.log("curS=" + curS);
+	if(matched != null){
 		return matched[0];
 	}else{
 		this.errMsg("Invalid salle", input);
 	}
-	//var curS = this.next(input);
+	var curS = this.next(input);
 }
-
 
 module.exports = CruParser;
