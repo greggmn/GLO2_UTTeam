@@ -3,6 +3,14 @@
 
 const {program} = require('@caporal/core');
 const readlineSync = require('readline-sync');
+const CruParser = require("./CruParser");
+const {argument, action} = require("caporal");
+const fs = require("fs");
+
+
+var analyzer = new CruParser();
+
+
 program
     .command('accueil', 'Enonce les options du programme')
     .action(() => {
@@ -38,6 +46,7 @@ program
                 break;
             case '3':
 
+
                 break;
             case '4':
 
@@ -68,6 +77,54 @@ program
 
 
     });
+
+program
+    .command("Option3", "Execute l'option 3 (disponibilités d’une salle)")
+    .argument("<salle>",  "salle dont on veut les disponibilités")
+    .argument("<file>", 'fichier CRU')
+    .action(({ logger, args }) => {
+        fs.readFile(args.file, 'utf8', function (err,data) {
+            if (err) {
+                return logger.warn(err);
+            }
+
+        analyzer.parse(data);
+
+        if (analyzer.errorCount === 0) {
+            const salle = args.salle;
+            const disponibilites = [];
+
+
+            analyzer.parsedUE.forEach((ue) => {
+                ue.creneaux.forEach((creneau) => {
+                    if (creneau.salle === salle) {
+                        disponibilites.push(creneau.horaire);
+                    }
+                });
+            });
+
+            if (disponibilites.length > 0) {
+                logger.info(`Disponibilités pour la salle ${salle}:`);
+                disponibilites.forEach((creneau) => {
+                    logger.info(`- ${creneau}`);
+                });
+            } else {
+                logger.info(`Aucune disponibilité trouvée pour la salle ${salle}.`);
+            }
+        }
+        else{
+            logger.info("The .cru file contains error".red);
+        }
+
+
+
+
+        });
+
+
+    });
+
+
 
 
 program.run();
