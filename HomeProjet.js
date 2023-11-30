@@ -13,8 +13,8 @@ program
 
         console.log("Voici les options du programme:")
         console.log("Taper 1 pour vérifier la validité du format CRU")
-        console.log("Taper 2 pour consulter les salles disponibles selon le créneau horaire")
-        console.log("Taper 3 pour consulter les disponibilités d’une salle")
+        console.log("Taper 2 pour consulter les salles disponibles selon le créneau horaire") //Greg
+        console.log("Taper 3 pour consulter les disponibilités d’une salle")  //Greg
         console.log("Taper 4 pour consulter les informations d'une salle")
         console.log("Taper 5 pour réserver une salle")
         console.log("Taper 6 pour voir vos réservations")
@@ -22,7 +22,7 @@ program
 
         //Si admin
         if (reponse2 === "admin") {
-            console.log("Taper 8 pour visualiser l’occupation des salles")
+            console.log("Taper 8 pour visualiser l’occupation des salles") //Greg
             console.log("Taper 9 pour créer et/ou modifier une salle")
 
         }
