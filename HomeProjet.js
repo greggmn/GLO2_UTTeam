@@ -3,9 +3,10 @@
 
 const {program} = require('@caporal/core');
 const readlineSync = require('readline-sync');
-const CruParser = require("./CruParser");
-const {argument, action} = require("caporal");
+const CruParser = require("./CruParserSansLog");
+
 const fs = require("fs");
+const path = require('path');
 
 
 var analyzer = new CruParser();
@@ -78,53 +79,96 @@ program
 
     });
 
+// ...
+
 program
     .command("Option3", "Execute l'option 3 (disponibilités d’une salle)")
-    .argument("<salle>",  "salle dont on veut les disponibilités")
-    .argument("<file>", 'fichier CRU')
-    .action(({ logger, args }) => {
-        fs.readFile(args.file, 'utf8', function (err,data) {
+    .argument("<salle>", "salle dont on veut les disponibilités")
+    .argument("<folder>", "nom du dossier contenant les fichiers")
+    .action(async ({ logger, args }) => {
+        const folderName = args.folder;
+        const folderPath = path.join(__dirname, folderName);
+
+        // Créer un tableau pour stocker les résultats
+        const allResults = [];
+
+        // Lire le contenu du dossier
+        fs.readdir(folderPath, (err, files) => {
             if (err) {
                 return logger.warn(err);
             }
 
-        analyzer.parse(data);
+            // Créer une promesse pour chaque fichier
+            const promises = files.map(file => {
+                const filePath = path.join(folderPath, file);
 
-        if (analyzer.errorCount === 0) {
-            const salle = args.salle;
-            const disponibilites = [];
+                return new Promise((resolve, reject) => {
+                    fs.readFile(filePath, 'utf8', (err, data) => {
+                        if (err) {
+                            reject(err);
+                        }
 
+                        // Exécuter l'analyse en arrière-plan
+                        analyzer.parse(data);
 
-            analyzer.parsedUE.forEach((ue) => {
-                ue.creneaux.forEach((creneau) => {
-                    if (creneau.salle === salle) {
-                        disponibilites.push(creneau.horaire);
-                    }
+                        const salle = args.salle;
+                        const disponibilites = [];
+
+                        analyzer.parsedUE.forEach((ue) => {
+                            ue.creneaux.forEach((creneau) => {
+                                if (creneau.salle === salle) {
+                                    disponibilites.push({
+                                        horaire: creneau.horaire,
+                                        jour: creneau.jour,
+                                    });
+                                }
+                            });
+                        });
+
+                        // Stocker les résultats dans le tableau
+                        allResults.push({
+                            file,
+                            disponibilites: [...new Set(disponibilites)], // Utiliser un ensemble pour éviter les doublons
+                        });
+
+                        resolve();
+                    });
                 });
             });
 
-            if (disponibilites.length > 0) {
-                logger.info(`Disponibilités pour la salle ${salle}:`);
-                disponibilites.forEach((creneau) => {
-                    logger.info(`- ${creneau}`);
+            // Attendre que toutes les promesses soient résolues
+            Promise.all(promises)
+                .then(() => {
+                    // Afficher les résultats une fois toutes les analyses terminées
+                    allResults.forEach(result => {
+                        const { file, disponibilites } = result;
+
+                        const uniqueDisponibilites = [...new Set(disponibilites)]; // Utiliser un ensemble pour éviter les doublons
+
+                        if (uniqueDisponibilites.length > 0) {
+                            logger.info(`Disponibilités pour la salle ${args.salle} dans le fichier ${file}:`);
+                            uniqueDisponibilites.forEach(({ horaire, jour }) => {
+                                logger.info(`- ${jour} ${horaire}`);
+                            });
+                        } else {
+                            logger.info(`Aucune disponibilité trouvée pour la salle ${args.salle} dans le fichier ${file}.`);
+                        }
+
+                    });
+
+                    // Vous pouvez ajouter du code ici pour afficher des résultats globaux
+                    logger.info("Toutes les analyses sont terminées.");
+                })
+                .catch((err) => {
+                    // Gérer les erreurs éventuelles ici
+                    logger.error(err);
                 });
-            } else {
-                logger.info(`Aucune disponibilité trouvée pour la salle ${salle}.`);
-            }
-        }
-        else{
-            logger.info("The .cru file contains error".red);
-        }
-
-
-
-
         });
-
-
     });
 
 
 
 
 program.run();
+
+

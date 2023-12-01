@@ -13,6 +13,7 @@
     "@caporal/core": "^2.0.2",
     "caporal": "^1.4.0",
     "colors": "^1.4.0",
+    "date-fns": "^2.30.0",
     "readline-sync": "^1.4.10",
     "vega": "^5.17.0",
     "vega-lite": "^4.17.0"
