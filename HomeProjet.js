@@ -7,6 +7,7 @@ const CruParser = require("./CruParserSansLog");
 
 const fs = require("fs");
 const path = require('path');
+const buffer = require("buffer");
 
 
 var analyzer = new CruParser();
@@ -33,6 +34,9 @@ program
         if (reponse2 === "admin") {
             console.log("Taper 8 pour visualiser l’occupation des salles") //Greg
             console.log("Taper 9 pour créer et/ou modifier une salle")
+            console.log("Taper 10 pour exporter un emploi du temps")
+            console.log("Taper 11 pour importer un emploi du temps")
+
 
         }
         const question = '\n Entrer le numéro de la fonction à utiliser \n';
@@ -167,7 +171,43 @@ program
     });
 
 
+program
+    .command('Option10','export edt au format cru')
+    .argument('<file>',"l'edt que l'on souhaite exporter")
+    .argument('<folder>',"le dossier dans lequel l'edt sera exporter")
+    .action(({args,logger})=> {
+        const fileName = args.file
+        const folderName = args.folder;
+        const folderPath = path.join(__dirname, folderName);
+        const exportFilePath = path.join(folderPath,fileName.slice(14))
 
+        // If the file doesn't exist, create the directory
+        if (!fs.existsSync(folderPath)) {
+            fs.mkdir(folderPath, {recursive:true},(err)=> {
+                if (err) {
+                    logger.warn(err)
+                }
+                console.log('Directory created successfully!');
+            })
+        }
+
+        // Read the file passed in parameters
+        fs.readFile(args.file,null, (err,data)=> {
+            if (err) {
+                return logger.warn(err);
+            }
+            console.log(exportFilePath);
+
+            fs.writeFile(exportFilePath, data, (err) => {
+                if (err) {
+                    return logger.warn(err);
+                }
+                console.log('Data written successfully!');
+            })
+        })
+
+
+    })
 
 program.run();
 
