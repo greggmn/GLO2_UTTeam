@@ -196,7 +196,6 @@ program
             if (err) {
                 return logger.warn(err);
             }
-            console.log(exportFilePath);
 
             fs.writeFile(exportFilePath, data, (err) => {
                 if (err) {
