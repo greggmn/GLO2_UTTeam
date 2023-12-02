@@ -89,83 +89,57 @@ program
         const folderName = args.folder;
         const folderPath = path.join(__dirname, folderName);
 
-        // Créer un tableau pour stocker les résultats
-        const allResults = [];
+        logger.info(`Lecture des fichiers dans le dossier ${folderPath}`);
 
         // Lire le contenu du dossier
-        fs.readdir(folderPath, (err, files) => {
-            if (err) {
-                return logger.warn(err);
+        const files = fs.readdirSync(folderPath);
+
+        for (const file of files) {
+            const filePath = path.join(folderPath, file);
+
+            try {
+                logger.info(`Lecture du fichier ${filePath}`);
+                const data = fs.readFileSync(filePath, 'utf8');
+
+                // Exécuter l'analyse
+                analyzer.parse(data);
+
+                const salle = args.salle;
+                const disponibilites = [];
+
+                analyzer.parsedUE.forEach((ue) => {
+                    ue.creneaux.forEach((creneau) => {
+                        if (creneau.salle === salle) {
+                            disponibilites.push({
+                                horaire: creneau.horaire,
+                                jour: creneau.jour,
+                            });
+                        }
+                    });
+                });
+
+                const uniqueDisponibilites = [...new Set(disponibilites)];
+
+                if (uniqueDisponibilites.length > 0) {
+                    logger.info(`Disponibilités pour la salle ${args.salle} dans le fichier ${file}:`);
+                    uniqueDisponibilites.forEach(({ horaire, jour }) => {
+                        logger.info(`- ${jour} ${horaire}`);
+                    });
+                } else {
+                    logger.info(`Aucune disponibilité trouvée pour la salle ${args.salle} dans le fichier ${file}.`);
+                }
+            } catch (err) {
+                // Gérer les erreurs éventuelles ici
+                logger.error(`Erreur lors de la lecture du fichier ${file}: ${err.message}`);
             }
+        }
 
-            // Créer une promesse pour chaque fichier
-            const promises = files.map(file => {
-                const filePath = path.join(folderPath, file);
-
-                return new Promise((resolve, reject) => {
-                    fs.readFile(filePath, 'utf8', (err, data) => {
-                        if (err) {
-                            reject(err);
-                        }
-
-                        // Exécuter l'analyse en arrière-plan
-                        analyzer.parse(data);
-
-                        const salle = args.salle;
-                        const disponibilites = [];
-
-                        analyzer.parsedUE.forEach((ue) => {
-                            ue.creneaux.forEach((creneau) => {
-                                if (creneau.salle === salle) {
-                                    disponibilites.push({
-                                        horaire: creneau.horaire,
-                                        jour: creneau.jour,
-                                    });
-                                }
-                            });
-                        });
-
-                        // Stocker les résultats dans le tableau
-                        allResults.push({
-                            file,
-                            disponibilites: [...new Set(disponibilites)], // Utiliser un ensemble pour éviter les doublons
-                        });
-
-                        resolve();
-                    });
-                });
-            });
-
-            // Attendre que toutes les promesses soient résolues
-            Promise.all(promises)
-                .then(() => {
-                    // Afficher les résultats une fois toutes les analyses terminées
-                    allResults.forEach(result => {
-                        const { file, disponibilites } = result;
-
-                        const uniqueDisponibilites = [...new Set(disponibilites)]; // Utiliser un ensemble pour éviter les doublons
-
-                        if (uniqueDisponibilites.length > 0) {
-                            logger.info(`Disponibilités pour la salle ${args.salle} dans le fichier ${file}:`);
-                            uniqueDisponibilites.forEach(({ horaire, jour }) => {
-                                logger.info(`- ${jour} ${horaire}`);
-                            });
-                        } else {
-                            logger.info(`Aucune disponibilité trouvée pour la salle ${args.salle} dans le fichier ${file}.`);
-                        }
-
-                    });
-
-                    // Vous pouvez ajouter du code ici pour afficher des résultats globaux
-                    logger.info("Toutes les analyses sont terminées.");
-                })
-                .catch((err) => {
-                    // Gérer les erreurs éventuelles ici
-                    logger.error(err);
-                });
-        });
+        // Afficher un message une fois toutes les analyses terminées
+        logger.info("Toutes les analyses sont terminées.");
     });
 
+
+program.run;
 
 
 
