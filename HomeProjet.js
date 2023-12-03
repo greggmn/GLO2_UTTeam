@@ -26,7 +26,7 @@ program
         console.log("Taper 3 pour consulter les disponibilités d’une salle")  //Greg
         console.log("Taper 4 pour consulter les informations d'une salle")
         console.log("Taper 5 pour réserver une salle")
-        console.log("Taper 6 pour voir vos réservations")
+        console.log("Taper 6 pour voir vos réservations") //Implémeter l'export icalendar/CRU ici
         console.log("Taper 7 pour annuler une réservation")
 
         //Si admin
