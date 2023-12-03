@@ -7,10 +7,11 @@ const CruParser = require("./CruParserSansLog");
 
 const fs = require("fs");
 const path = require('path');
+const SpecsGreg = require('./SpecsGreg');
 
 
 var analyzer = new CruParser();
-
+SpecsGreg.initCommandes(program, analyzer);
 
 program
     .command('accueil', 'Enonce les options du programme')
@@ -43,6 +44,11 @@ program
 
                 break;
             case '2':
+                const q = '\n Entrer le créneau horaire sous la forme HH:MM \n';
+                const r = readlineSync.question(q);
+                program.exec('Option2', [r, 'SujetA_data'] );
+
+
 
                 break;
             case '3':
@@ -79,7 +85,7 @@ program
 
     });
 
-// ...
+/*
 
 program
     .command("Option3", "Execute l'option 3 (disponibilités d’une salle)")
@@ -137,7 +143,7 @@ program
         // Afficher un message une fois toutes les analyses terminées
         logger.info("Toutes les analyses sont terminées.");
     });
-
+*/
 
 program.run;
 
