@@ -46,7 +46,7 @@ program
             case '2':
                 const q = '\n Entrer le créneau horaire sous la forme HH:MM \n';
                 const r = readlineSync.question(q);
-                program.exec('Option2', [r, 'SujetA_data'] );
+                //program.exec('Option2', [r, 'SujetA_data'] );
 
 
 
