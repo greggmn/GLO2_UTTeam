@@ -2,17 +2,16 @@
 
 
 const {program} = require('@caporal/core');
-const CruParser = require("./CruParserSansLog");
-var analyzer = new CruParser();
-function initCommandes(program, analyzer) {
-    const CruParser = require("./CruParserSansLog");
 
+//function initCommandes(program, analyzer) {
+    const CruParser = require("./CruParserSansLog");
+    var analyzer = new CruParser();
     const fs = require("fs");
     const path = require('path');
 
 
 
-
+/*
     program
         .command("Option2", "Liste toutes les salles disponibles à un horaire donné")
         .argument("<horaire>", "Horaire pour lequel vous voulez les salles disponibles (ex: 10:30)")
@@ -61,7 +60,59 @@ function initCommandes(program, analyzer) {
             } else {
                 logger.info(`Aucune salle disponible pour l'horaire ${args.horaire} dans tous les fichiers analysés.`);
             }
+        });*/
+
+program
+    .command("Option2", "Liste toutes les salles disponibles à un horaire donné")
+    .argument("<jour>", "Jour pour lequel vous voulez les salles disponibles (ex: L, MA, ME)")
+    .argument("<heure>", "Heure pour lequel vous voulez les salles disponibles (ex: 10:30)")
+    .argument("<folder>", "Nom du dossier contenant les fichiers")
+    .action(async ({logger, args}) => {
+        const folderName = args.folder;
+        const folderPath = path.join(__dirname, folderName);
+
+        logger.info(`Lecture des fichiers dans le dossier ${folderPath}`);
+
+        // Lire le contenu du dossier
+        const files = fs.readdirSync(folderPath);
+
+        const horaireRecherche = `${args.jour} ${args.heure}`;
+        const sallesOccupes = [];
+
+        for (const file of files) {
+            const filePath = path.join(folderPath, file);
+
+            try {
+                const data = fs.readFileSync(filePath, 'utf8');
+                analyzer.parse(data);
+            } catch (err) {
+                logger.info(`Erreur lors de la lecture du fichier ${file}: ${err.message}`);
+            }
+        }
+
+        // Réaliser des opérations après avoir analysé tous les fichiers
+        analyzer.parsedUE.forEach((ue) => {
+            ue.creneaux.forEach((creneau) => {
+                const horaire = `${creneau.jour} ${creneau.horaire}`;
+                if (heureEstDansCreneau(horaireRecherche, horaire)) {
+                    sallesOccupes.push(creneau.salle);
+                }
+            });
         });
+
+        const sallesTotales = getSalleTotales(folderPath);
+        const sallesDisponibles = sallesTotales.filter(salle => !sallesOccupes.includes(salle));
+
+        if (sallesDisponibles.length > 0) {
+            logger.info(`Salles disponibles pour le ${args.jour} à ${args.heure} :`);
+            sallesDisponibles.forEach((salle) => {
+                logger.info(`- ${salle}`);
+            });
+        } else {
+            logger.info(`Aucune salle disponible pour le ${args.jour} à ${args.heure} dans tous les fichiers analysés.`);
+        }
+    });
+
 
     function heureEstDansCreneau(heureRecherche, horaireCreneau) {
         if (horaireCreneau) {
@@ -255,6 +306,252 @@ function initCommandes(program, analyzer) {
             }
         });
 
-    program.run();
-}
-module.exports = {initCommandes};
+program
+    .command("Option8b", "Execute l'option 8 (occupation d’une salle)")
+    .argument("<salle>", "Salle dont on veut les disponibilités")
+    .argument("<folder>", "Nom du dossier contenant les fichiers")
+    .action(async ({logger, args}) => {
+        const folderName = args.folder;
+        const folderPath = path.join(__dirname, folderName);
+
+        logger.info(`Lecture des fichiers dans le dossier ${folderPath}`);
+
+        // Lire le contenu du dossier
+        const files = fs.readdirSync(folderPath);
+
+        // Initialiser l'analyseur en dehors de la boucle
+        const analyzer = new CruParser();
+
+        for (const file of files) {
+            const filePath = path.join(folderPath, file);
+
+            try {
+                const data = fs.readFileSync(filePath, 'utf8');
+                // Exécuter l'analyse une seule fois
+                analyzer.parse(data);
+            } catch (err) {
+                // Gérer les erreurs éventuelles ici
+                logger.info(`Erreur lors de la lecture du fichier ${file}: ${err.message}`);
+            }
+        }
+
+        // Réaliser des opérations après avoir analysé tous les fichiers
+        const salle = args.salle;
+        const heuresDisponibles = calculateTotalHoursAvailable();
+        const heuresOccupees = calculateTotalOccupiedHours(salle);
+
+        if (heuresDisponibles > 0) {
+            const pourcentageOccupation = (heuresOccupees / heuresDisponibles) * 100;
+            logger.info(`Pourcentage d'occupation de la salle ${args.salle} dans tous les fichiers analysés : ${pourcentageOccupation.toFixed(2)}%`);
+        } else {
+            logger.info(`Aucune plage horaire disponible pour la salle ${args.salle} dans tous les fichiers analysés.`);
+        }
+
+        function calculateTotalHoursAvailable() {
+            // Calculer le nombre total d'heures disponibles dans la semaine
+            const heuresDebutLimite = "08:00";
+            const heuresFinLimite = "20:00";
+            const joursSemaine = ["L", "MA", "ME", "J", "V", "S"];
+            let heuresDisponibles = 0;
+
+            joursSemaine.forEach(jour => {
+                heuresDisponibles += calculateHoursBetween(heuresDebutLimite, heuresFinLimite);
+            });
+
+            return heuresDisponibles;
+        }
+
+        function calculateTotalOccupiedHours(salle) {
+            // Calculer le nombre total d'heures occupées pour la salle spécifiée
+            let heuresOccupees = 0;
+
+            analyzer.parsedUE.forEach((ue) => {
+                ue.creneaux.forEach((creneau) => {
+                    if (creneau.salle === salle) {
+                        heuresOccupees += calculateHoursBetween(creneau.horaire.split('-')[0], creneau.horaire.split('-')[1]);
+                    }
+                });
+            });
+
+            return heuresOccupees;
+        }
+
+        function calculateHoursBetween(heureDebut, heureFin) {
+            // Calculer le nombre d'heures entre deux horaires
+            const debut = new Date(`2000-01-01 ${heureDebut}`);
+            const fin = new Date(`2000-01-01 ${heureFin}`);
+            return (fin - debut) / (1000 * 60 * 60); // Convertir la différence en heures
+        }
+    });
+program
+    .command("Classement", "Classe les salles en fonction de leur pourcentage d'occupation")
+    .argument("<folder>", "Nom du dossier contenant les fichiers")
+    .action(async ({ logger, args }) => {
+        const folderName = args.folder;
+        const folderPath = path.join(__dirname, folderName);
+
+        logger.info(`Lecture des fichiers dans le dossier ${folderPath}`);
+
+        // Lire le contenu du dossier
+        const files = fs.readdirSync(folderPath);
+
+        // Initialiser l'analyseur en dehors de la boucle
+        const analyzer = new CruParser();
+        const salleOccupationMap = new Map();
+
+        for (const file of files) {
+            const filePath = path.join(folderPath, file);
+
+            try {
+                const data = fs.readFileSync(filePath, 'utf8');
+                // Exécuter l'analyse une seule fois
+                analyzer.parse(data);
+
+                // Calculer le pourcentage d'occupation pour chaque salle
+                analyzer.parsedUE.forEach((ue) => {
+                    if (ue.creneaux && ue.creneaux.length > 0) {
+                        ue.creneaux.forEach((creneau) => {
+                            if (creneau.salle && creneau.horaire) {
+                                const salle = creneau.salle;
+                                const heuresOccupées = calculateHoursBetween(creneau.horaire.split('-')[0], creneau.horaire.split('-')[1]);
+                                salleOccupationMap.set(salle, (salleOccupationMap.get(salle) || 0) + heuresOccupées);
+                            }
+                        });
+                    }
+                });
+            } catch (err) {
+                // Gérer les erreurs éventuelles ici
+                logger.info(`Erreur lors de la lecture du fichier ${file}: ${err.message}`);
+            }
+        }
+
+        // Trier les salles par pourcentage d'occupation décroissant
+        const sortedSalles =  Array.from(salleOccupationMap.keys()).sort((salleA, salleB) => {
+            const pourcentageA = (salleOccupationMap.get(salleA) / calculateTotalHoursAvailable(sortedSalles)) * 100;
+            const pourcentageB = (salleOccupationMap.get(salleB) / calculateTotalHoursAvailable(sortedSalles)) * 100;
+
+            return pourcentageB - pourcentageA;
+        });
+
+        logger.info("Classement des salles en fonction de leur pourcentage d'occupation :");
+        sortedSalles.forEach((salle) => {
+            const pourcentageOccupation = (salleOccupationMap.get(salle) / calculateTotalHoursAvailable(sortedSalles)) * 100;
+            logger.info(`- ${salle}: ${pourcentageOccupation.toFixed(2)}%`);
+        });
+
+        function calculateHoursBetween(heureDebut, heureFin) {
+            // Vérifier si creneau.horaire existe
+            if (!heureDebut || !heureFin) {
+                return 0;
+            }
+
+            // Calculer le nombre d'heures entre deux horaires
+            const debut = new Date(`2000-01-01 ${heureDebut}`);
+            const fin = new Date(`2000-01-01 ${heureFin}`);
+            return (fin - debut) / (1000 * 60 * 60); // Convertir la différence en heures
+        }
+
+        function calculateTotalHoursAvailable(salles) {
+            // Calculer le nombre total d'heures disponibles dans la semaine
+            const heuresDebutLimite = "08:00";
+            const heuresFinLimite = "20:00";
+            const joursSemaine = ["L", "MA", "ME", "J", "V", "S"];
+            let heuresDisponibles = 0;
+
+            joursSemaine.forEach(jour => {
+                heuresDisponibles += calculateHoursBetween(heuresDebutLimite, heuresFinLimite);
+            });
+
+            return heuresDisponibles * salles.length; // Multiplication par le nombre de salles pour obtenir le total
+        }
+    });
+
+
+
+
+
+program.run();
+//}
+//module.exports = {initCommandes};
+rogram
+    .command("Classement", "Classe les salles en fonction de leur pourcentage d'occupation")
+    .argument("<folder>", "Nom du dossier contenant les fichiers")
+    .action(async ({ logger, args }) => {
+        const folderName = args.folder;
+        const folderPath = path.join(__dirname, folderName);
+
+        logger.info(`Lecture des fichiers dans le dossier ${folderPath}`);
+
+        // Lire le contenu du dossier
+        const files = fs.readdirSync(folderPath);
+
+        // Initialiser l'analyseur en dehors de la boucle
+        const analyzer = new CruParser();
+        const salleOccupationMap = new Map();
+
+        for (const file of files) {
+            const filePath = path.join(folderPath, file);
+
+            try {
+                const data = fs.readFileSync(filePath, 'utf8');
+                // Exécuter l'analyse une seule fois
+                analyzer.parse(data);
+
+                // Calculer le pourcentage d'occupation pour chaque salle
+                analyzer.parsedUE.forEach((ue) => {
+                    if (ue.creneaux && ue.creneaux.length > 0) {
+                        ue.creneaux.forEach((creneau) => {
+                            if (creneau.salle && creneau.horaire) {
+                                const salle = creneau.salle;
+                                const heuresOccupées = calculateHoursBetween(creneau.horaire.split('-')[0], creneau.horaire.split('-')[1]);
+                                salleOccupationMap.set(salle, (salleOccupationMap.get(salle) || 0) + heuresOccupées);
+                            }
+                        });
+                    }
+                });
+            } catch (err) {
+                // Gérer les erreurs éventuelles ici
+                logger.info(`Erreur lors de la lecture du fichier ${file}: ${err.message}`);
+            }
+        }
+
+        // Trier les salles par pourcentage d'occupation décroissant
+        const sortedSalles =  Array.from(salleOccupationMap.keys()).sort((salleA, salleB) => {
+            const pourcentageA = (salleOccupationMap.get(salleA) / calculateTotalHoursAvailable(sortedSalles)) * 100;
+            const pourcentageB = (salleOccupationMap.get(salleB) / calculateTotalHoursAvailable(sortedSalles)) * 100;
+
+            return pourcentageB - pourcentageA;
+        });
+
+        logger.info("Classement des salles en fonction de leur pourcentage d'occupation :");
+        sortedSalles.forEach((salle) => {
+            const pourcentageOccupation = (salleOccupationMap.get(salle) / calculateTotalHoursAvailable(sortedSalles)) * 100;
+            logger.info(`- ${salle}: ${pourcentageOccupation.toFixed(2)}%`);
+        });
+
+        function calculateHoursBetween(heureDebut, heureFin) {
+            // Vérifier si creneau.horaire existe
+            if (!heureDebut || !heureFin) {
+                return 0;
+            }
+
+            // Calculer le nombre d'heures entre deux horaires
+            const debut = new Date(`2000-01-01 ${heureDebut}`);
+            const fin = new Date(`2000-01-01 ${heureFin}`);
+            return (fin - debut) / (1000 * 60 * 60); // Convertir la différence en heures
+        }
+
+        function calculateTotalHoursAvailable(salles) {
+            // Calculer le nombre total d'heures disponibles dans la semaine
+            const heuresDebutLimite = "08:00";
+            const heuresFinLimite = "20:00";
+            const joursSemaine = ["L", "MA", "ME", "J", "V", "S"];
+            let heuresDisponibles = 0;
+
+            joursSemaine.forEach(jour => {
+                heuresDisponibles += calculateHoursBetween(heuresDebutLimite, heuresFinLimite);
+            });
+
+            return heuresDisponibles * salles.length; // Multiplication par le nombre de salles pour obtenir le total
+        }
+    });
