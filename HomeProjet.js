@@ -8,10 +8,11 @@ const CruParser = require("./CruParserSansLog");
 const fs = require("fs");
 const path = require('path');
 const SpecsGreg = require('./SpecsGreg');
+const exportData = require('./ExportImportModule');
+
 
 
 var analyzer = new CruParser();
-SpecsGreg.initCommandes(program, analyzer);
 
 program
     .command('accueil', 'Enonce les options du programme')
@@ -34,6 +35,8 @@ program
         if (reponse2 === "admin") {
             console.log("Taper 8 pour visualiser l’occupation des salles") //Greg
             console.log("Taper 9 pour créer et/ou modifier une salle")
+            console.log("Taper 10")
+
 
         }
         const question = '\n Entrer le numéro de la fonction à utiliser \n';
@@ -77,6 +80,14 @@ program
                 if (reponse2 !== "admin") {
                     console.log("Accès interdit");
                 }
+                break;
+            case '10':
+                if (reponse2 !== "admin") {
+                    console.log("Accès interdit");
+                }
+                const fichier = readlineSync.question("Entrer l'edt voulu :\n")
+                const folder = readlineSync.question("entrer le fichier destionation :\n")
+                exportData(fichier,folder)
                 break;
 
 
