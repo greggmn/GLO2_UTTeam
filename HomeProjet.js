@@ -126,9 +126,6 @@ demarrage()
                 const ques2 ="Entrez le path du fichier dans lequel vous voulez exporter (ex: Export):\n"
                 const fileName = readlineSync.question(ques);
                 const folderName = readlineSync.question(ques2);
-
-                console.log('Réponse à la première question :', fileName);
-                console.log('Réponse à la deuxième question :', folderName);
                 exportData(fileName,folderName)
 
                 break;

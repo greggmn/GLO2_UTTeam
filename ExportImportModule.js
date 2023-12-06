@@ -6,16 +6,19 @@ async function exportData(fileName, folderName) {
     const folderPath = path.join(__dirname, folderName);
     const exportFilePath = path.join(folderPath, fileName.slice(12));
 
-    // Create the directory if it doesn't exist
     try {
-        await fs.mkdir(folderPath, { recursive: true });
-        console.log('Directory created successfully!');
+        await fs.access(folderPath);
+        console.log('Directory already exists!');
     } catch (err) {
-        console.log(`Error creating directory: ${err.message}`);
-        return;
+        try {
+            await fs.mkdir(folderPath, { recursive: true });
+            console.log('Directory created successfully!');
+        } catch (err) {
+            console.log(`Error creating directory: ${err.message}`);
+            return;
+        }
     }
 
-    // Read the file and write data to the new file
     try {
         const data = await fs.readFile(fileName,'utf-8');
         const analyzer = new CruParser();
