@@ -7,6 +7,7 @@ var Creneau = require('./Creneau');
 var CruParser = function(sTokenize, sParsedSymb){
 	// The list of UE parsed from the input file.
 	this.parsedUE = [];
+	this.allCreneaux = [];
 	this.symb = ["+","code","créneau",""];
 	this.showTokenize = sTokenize;
 	this.showParsedSymbols = sParsedSymb;
@@ -95,7 +96,6 @@ CruParser.prototype.listUE = function(input){
 // UE = "+" <body>
 CruParser.prototype.ue = function(input){
 
-	//if(this.check("+", input)){
 		this.expect("", input);
 		var args = this.code(input);
 		var ue = new UE(args, []);
@@ -107,9 +107,6 @@ CruParser.prototype.ue = function(input){
 			this.ue(input);
 		}
 		return true;
-	//}else{
-		//return false;
-	//}
 }
 
 
@@ -138,7 +135,8 @@ CruParser.prototype.creneaux = function (input, curUE){
 	
 	var creneau = new Creneau(ty, nbP, j, h, gC, s);
 	curUE.addCreneau(creneau);
-
+	this.allCreneaux.push(creneau);
+	console.log(this.allCreneaux);
 }
 
 

@@ -1,100 +1,194 @@
 #!/usr/bin/env ts-node
-
-
-const {program} = require('@caporal/core');
 const readlineSync = require('readline-sync');
-const CruParser = require("./CruParserSansLog");
 
-const fs = require("fs");
-const path = require('path');
-const SpecsGreg = require('./SpecsGreg');
-const exportData = require('./ExportImportModule');
+import('inquirer')
+  .then((inquirerModule) => {
+    const inquirer = inquirerModule.default;
+
+function demarrage(){
+    const inscription = [
+        "administrateur",
+        "professeur",
+        "élève"
+    ];
+
+    return inquirer.prompt([
+        {
+            type: 'rawlist',
+            name: 'choix',
+            message: "Votre statut dans l'université:",
+            choices: inscription
+        },
+    ]) ;
+}
+    
+
+function actionAFaire(){
+    const rawList = [
+        "vérifier la validité du format CRU",
+        "consulter les salles disponibles selon le créneau horaire",
+        "consulter les disponibilités d’une salle",
+        "consulter les informations d'une salle",
+        "réserver une salle",
+        "voir vos réservations",
+        "annuler une réservation"
+      ];
+
+      return inquirer.prompt([
+        {
+            type: 'rawlist',
+            name: 'choix',
+            message: "Choisissez l'action que vous souhaitez réaliser:",
+            choices: rawList
+          },
+    ]) ;
+}
+
+function actionAFaireAdmin(){
+    const rawList = [
+        "vérifier la validité du format CRU",
+        "consulter les salles disponibles selon le créneau horaire",
+        "consulter les disponibilités d’une salle",
+        "consulter les informations d'une salle",
+        "réserver une salle",
+        "voir vos réservations",
+        "annuler une réservation",
+        "visualiser l’occupation des salles",
+        "créer et/ou modifier une salle"
+      ];
+
+      return inquirer.prompt([
+        {
+            type: 'rawlist',
+            name: 'choix',
+            message: "Choisissez l'action que vous souhaitez réaliser:",
+            choices: rawList
+          },
+    ]) ;
+}
+
+
+let statut, action, identifiant;
+demarrage()
+    .then((reponseDemarrage) => {
+        statut = reponseDemarrage.choix;
+
+        const question1 = 'Entrez votre identifiant \n';
+        identifiant = readlineSync.question(question1);
+
+        if (statut === "administrateur")
+            return actionAFaireAdmin();
+        else
+            return actionAFaire();
+    })
+    .then((reponseAction) => {
+        action = reponseAction.choix;
+
+        switch(action){
+            case "vérifier la validité du format CRU":
+
+                break;
+            case "consulter les salles disponibles selon le créneau horaire":
+
+
+                break;
+            case "consulter les disponibilités d’une salle":
+
+
+                break;
+            case "consulter les informations d'une salle":
+
+                break;
+            case "réserver une salle":
+                const reservation = require('./reservation');
+                reservation.menuReservation(statut, identifiant);
+                break;
+            case "voir vos réservations":
+
+                break;
+            case "annuler une réservation":
+
+                break;
+            case "visualiser l’occupation des salles":
+
+                break;
+            case "créer et/ou modifier une salle":
+
+                break;
+        }
+
+    })
+    .catch((erreur) => {
+        console.log('Erreur :', erreur);
+    });
+
+  })
 
 
 
-var analyzer = new CruParser();
+
+/*
 
 program
-    .command('accueil', 'Enonce les options du programme')
-    .action(() => {
+    .command("Option3", "Execute l'option 3 (disponibilités d’une salle)")
+    .argument("<salle>", "salle dont on veut les disponibilités")
+    .argument("<folder>", "nom du dossier contenant les fichiers")
+    .action(async ({ logger, args }) => {
+        const folderName = args.folder;
+        const folderPath = path.join(__dirname, folderName);
 
-        const question1 = 'Entrer votre mot de passe \n';
-        const reponse2 = readlineSync.question(question1);
+        logger.info(`Lecture des fichiers dans le dossier ${folderPath}`);
 
+        // Lire le contenu du dossier
+        const files = fs.readdirSync(folderPath);
 
-        console.log("Voici les options du programme:")
-        console.log("Taper 1 pour vérifier la validité du format CRU")
-        console.log("Taper 2 pour consulter les salles disponibles selon le créneau horaire") //Greg
-        console.log("Taper 3 pour consulter les disponibilités d’une salle")  //Greg
-        console.log("Taper 4 pour consulter les informations d'une salle")
-        console.log("Taper 5 pour réserver une salle")
-        console.log("Taper 6 pour voir vos réservations") //Implémeter l'export icalendar/CRU ici
-        console.log("Taper 7 pour annuler une réservation")
+        for (const file of files) {
+            const filePath = path.join(folderPath, file);
 
-        //Si admin
-        if (reponse2 === "admin") {
-            console.log("Taper 8 pour visualiser l’occupation des salles") //Greg
-            console.log("Taper 9 pour créer et/ou modifier une salle")
-            console.log("Taper 10")
+            try {
+                logger.info(`Lecture du fichier ${filePath}`);
+                const data = fs.readFileSync(filePath, 'utf8');
 
+                // Exécuter l'analyse
+                analyzer.parse(data);
 
-        }
-        const question = '\n Entrer le numéro de la fonction à utiliser \n';
-        const reponse = readlineSync.question(question);
+                const salle = args.salle;
+                const disponibilites = [];
 
-        switch (reponse) {
-            case '1':
+                analyzer.parsedUE.forEach((ue) => {
+                    ue.creneaux.forEach((creneau) => {
+                        if (creneau.salle === salle) {
+                            disponibilites.push({
+                                horaire: creneau.horaire,
+                                jour: creneau.jour,
+                            });
+                        }
+                    });
+                });
 
-                break;
-            case '2':
-                const q = '\n Entrer le créneau horaire sous la forme HH:MM \n';
-                const r = readlineSync.question(q);
-                //program.exec('Option2', [r, 'SujetA_data'] );
+                const uniqueDisponibilites = [...new Set(disponibilites)];
 
-
-
-                break;
-            case '3':
-
-
-                break;
-            case '4':
-
-                break;
-            case '5':
-
-                break;
-            case '6':
-
-                break;
-            case '7':
-
-                break;
-            case '8':
-                if (reponse2 !== "admin") {
-                    console.log("Accès interdit");
+                if (uniqueDisponibilites.length > 0) {
+                    logger.info(`Disponibilités pour la salle ${args.salle} dans le fichier ${file}:`);
+                    uniqueDisponibilites.forEach(({ horaire, jour }) => {
+                        logger.info(`- ${jour} ${horaire}`);
+                    });
+                } else {
+                    logger.info(`Aucune disponibilité trouvée pour la salle ${args.salle} dans le fichier ${file}.`);
                 }
-
-                break;
-            case '9':
-                if (reponse2 !== "admin") {
-                    console.log("Accès interdit");
-                }
-                break;
-            case '10':
-                if (reponse2 !== "admin") {
-                    console.log("Accès interdit");
-                }
-                const fichier = readlineSync.question("Entrer l'edt voulu :\n")
-                const folder = readlineSync.question("entrer le fichier destionation :\n")
-                exportData(fichier,folder)
-                break;
-
-
+            } catch (err) {
+                // Gérer les erreurs éventuelles ici
+                logger.error(`Erreur lors de la lecture du fichier ${file}: ${err.message}`);
+            }
         }
 
-
+        // Afficher un message une fois toutes les analyses terminées
+        logger.info("Toutes les analyses sont terminées.");
     });
+*/
+/*
+program.run;
+
 
 /*
 
@@ -157,8 +251,6 @@ program
 */
 
 program.run;
-
-
 
 program.run();
 
