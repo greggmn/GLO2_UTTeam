@@ -1,6 +1,7 @@
 const fs = require('fs');
 const colors = require('colors');
 const CruParser = require('./CruParser.js');
+const reservation = require('./reservation.js');
 
 const vg = require('vega');
 const vegalite = require('vega-lite');
@@ -32,6 +33,7 @@ cli
 				console.log(analyzer.parsedUE);
 				console.log("listUE:");
 				console.log(analyzer.listUE);
+				
 			}else{
 				logger.info("The .cru file contains error".red);
 			}
@@ -41,6 +43,10 @@ cli
 		});
 
 	})
+
+	.command('reservation', 'Enable a reservation')
+	.action()
+
 
 	// readme
 	.command('readme', 'Display the README.txt file')

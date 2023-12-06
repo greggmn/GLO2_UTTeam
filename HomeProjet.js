@@ -1,85 +1,133 @@
 #!/usr/bin/env ts-node
-
-
-const {program} = require('@caporal/core');
 const readlineSync = require('readline-sync');
-const CruParser = require("./CruParserSansLog");
 
-const fs = require("fs");
-const path = require('path');
+import('inquirer')
+  .then((inquirerModule) => {
+    const inquirer = inquirerModule.default;
+
+function demarrage(){
+    const inscription = [
+        "administrateur",
+        "professeur",
+        "élève"
+    ];
+
+    return inquirer.prompt([
+        {
+            type: 'rawlist',
+            name: 'choix',
+            message: "Votre statut dans l'université:",
+            choices: inscription
+        },
+    ]) ;
+}
+    
+
+function actionAFaire(){
+    const rawList = [
+        "vérifier la validité du format CRU",
+        "consulter les salles disponibles selon le créneau horaire",
+        "consulter les disponibilités d’une salle",
+        "consulter les informations d'une salle",
+        "réserver une salle",
+        "voir vos réservations",
+        "annuler une réservation"
+      ];
+
+      return inquirer.prompt([
+        {
+            type: 'rawlist',
+            name: 'choix',
+            message: "Choisissez l'action que vous souhaitez réaliser:",
+            choices: rawList
+          },
+    ]) ;
+}
+
+function actionAFaireAdmin(){
+    const rawList = [
+        "vérifier la validité du format CRU",
+        "consulter les salles disponibles selon le créneau horaire",
+        "consulter les disponibilités d’une salle",
+        "consulter les informations d'une salle",
+        "réserver une salle",
+        "voir vos réservations",
+        "annuler une réservation",
+        "visualiser l’occupation des salles",
+        "créer et/ou modifier une salle"
+      ];
+
+      return inquirer.prompt([
+        {
+            type: 'rawlist',
+            name: 'choix',
+            message: "Choisissez l'action que vous souhaitez réaliser:",
+            choices: rawList
+          },
+    ]) ;
+}
 
 
-var analyzer = new CruParser();
+let statut, action, identifiant;
+demarrage()
+    .then((reponseDemarrage) => {
+        statut = reponseDemarrage.choix;
+
+        const question1 = 'Entrez votre identifiant \n';
+        identifiant = readlineSync.question(question1);
+
+        if (statut === "administrateur")
+            return actionAFaireAdmin();
+        else
+            return actionAFaire();
+    })
+    .then((reponseAction) => {
+        action = reponseAction.choix;
+
+        switch(action){
+            case "vérifier la validité du format CRU":
+
+                break;
+            case "consulter les salles disponibles selon le créneau horaire":
 
 
-program
-    .command('accueil', 'Enonce les options du programme')
-    .action(() => {
-
-        const question1 = 'Entrer votre mot de passe \n';
-        const reponse2 = readlineSync.question(question1);
+                break;
+            case "consulter les disponibilités d’une salle":
 
 
-        console.log("Voici les options du programme:")
-        console.log("Taper 1 pour vérifier la validité du format CRU")
-        console.log("Taper 2 pour consulter les salles disponibles selon le créneau horaire") //Greg
-        console.log("Taper 3 pour consulter les disponibilités d’une salle")  //Greg
-        console.log("Taper 4 pour consulter les informations d'une salle")
-        console.log("Taper 5 pour réserver une salle")
-        console.log("Taper 6 pour voir vos réservations")
-        console.log("Taper 7 pour annuler une réservation")
+                break;
+            case "consulter les informations d'une salle":
 
-        //Si admin
-        if (reponse2 === "admin") {
-            console.log("Taper 8 pour visualiser l’occupation des salles") //Greg
-            console.log("Taper 9 pour créer et/ou modifier une salle")
+                break;
+            case "réserver une salle":
+                const reservation = require('./reservation');
+                reservation.menuReservation(statut, identifiant);
+                break;
+            case "voir vos réservations":
 
+                break;
+            case "annuler une réservation":
+
+                break;
+            case "visualiser l’occupation des salles":
+
+                break;
+            case "créer et/ou modifier une salle":
+
+                break;
         }
-        const question = '\n Entrer le numéro de la fonction à utiliser \n';
-        const reponse = readlineSync.question(question);
 
-        switch (reponse) {
-            case '1':
-
-                break;
-            case '2':
-
-                break;
-            case '3':
-
-
-                break;
-            case '4':
-
-                break;
-            case '5':
-
-                break;
-            case '6':
-
-                break;
-            case '7':
-
-                break;
-            case '8':
-                if (reponse2 !== "admin") {
-                    console.log("Accès interdit");
-                }
-
-                break;
-            case '9':
-                if (reponse2 !== "admin") {
-                    console.log("Accès interdit");
-                }
-                break;
-
-
-        }
-
-
+    })
+    .catch((erreur) => {
+        console.log('Erreur :', erreur);
     });
 
-// ...
+  })
+
+
+
+
+/*
 
 program
     .command("Option3", "Execute l'option 3 (disponibilités d’une salle)")
@@ -89,134 +137,119 @@ program
         const folderName = args.folder;
         const folderPath = path.join(__dirname, folderName);
 
-        // Créer un tableau pour stocker les résultats
-        const allResults = [];
+        logger.info(`Lecture des fichiers dans le dossier ${folderPath}`);
 
         // Lire le contenu du dossier
-        fs.readdir(folderPath, (err, files) => {
-            if (err) {
-                return logger.warn(err);
+        const files = fs.readdirSync(folderPath);
+
+        for (const file of files) {
+            const filePath = path.join(folderPath, file);
+
+            try {
+                logger.info(`Lecture du fichier ${filePath}`);
+                const data = fs.readFileSync(filePath, 'utf8');
+
+                // Exécuter l'analyse
+                analyzer.parse(data);
+
+                const salle = args.salle;
+                const disponibilites = [];
+
+                analyzer.parsedUE.forEach((ue) => {
+                    ue.creneaux.forEach((creneau) => {
+                        if (creneau.salle === salle) {
+                            disponibilites.push({
+                                horaire: creneau.horaire,
+                                jour: creneau.jour,
+                            });
+                        }
+                    });
+                });
+
+                const uniqueDisponibilites = [...new Set(disponibilites)];
+
+                if (uniqueDisponibilites.length > 0) {
+                    logger.info(`Disponibilités pour la salle ${args.salle} dans le fichier ${file}:`);
+                    uniqueDisponibilites.forEach(({ horaire, jour }) => {
+                        logger.info(`- ${jour} ${horaire}`);
+                    });
+                } else {
+                    logger.info(`Aucune disponibilité trouvée pour la salle ${args.salle} dans le fichier ${file}.`);
+                }
+            } catch (err) {
+                // Gérer les erreurs éventuelles ici
+                logger.error(`Erreur lors de la lecture du fichier ${file}: ${err.message}`);
             }
+        }
 
-            // Créer une promesse pour chaque fichier
-            const promises = files.map(file => {
-                const filePath = path.join(folderPath, file);
-
-                return new Promise((resolve, reject) => {
-                    fs.readFile(filePath, 'utf8', (err, data) => {
-                        if (err) {
-                            reject(err);
-                        }
-
-                        // Exécuter l'analyse en arrière-plan
-                        analyzer.parse(data);
-
-                        const salle = args.salle;
-                        const disponibilites = [];
-
-                        analyzer.parsedUE.forEach((ue) => {
-                            ue.creneaux.forEach((creneau) => {
-                                if (creneau.salle === salle) {
-                                    disponibilites.push({
-                                        horaire: creneau.horaire,
-                                        jour: creneau.jour,
-                                    });
-                                }
-                            });
-                        });
-
-                        // Stocker les résultats dans le tableau
-                        allResults.push({
-                            file,
-                            disponibilites: [...new Set(disponibilites)], // Utiliser un ensemble pour éviter les doublons
-                        });
-
-                        resolve();
-                    });
-                });
-            });
-
-            // Attendre que toutes les promesses soient résolues
-            Promise.all(promises)
-                .then(() => {
-                    // Afficher les résultats une fois toutes les analyses terminées
-                    allResults.forEach(result => {
-                        const { file, disponibilites } = result;
-
-                        const uniqueDisponibilites = [...new Set(disponibilites)]; // Utiliser un ensemble pour éviter les doublons
-
-                        if (uniqueDisponibilites.length > 0) {
-                            logger.info(`Disponibilités pour la salle ${args.salle} dans le fichier ${file}:`);
-                            uniqueDisponibilites.forEach(({ horaire, jour }) => {
-                                logger.info(`- ${jour} ${horaire}`);
-                            });
-                        } else {
-                            logger.info(`Aucune disponibilité trouvée pour la salle ${args.salle} dans le fichier ${file}.`);
-                        }
-
-                    });
-
-                    // Vous pouvez ajouter du code ici pour afficher des résultats globaux
-                    logger.info("Toutes les analyses sont terminées.");
-                })
-                .catch((err) => {
-                    // Gérer les erreurs éventuelles ici
-                    logger.error(err);
-                });
-        });
+        // Afficher un message une fois toutes les analyses terminées
+        logger.info("Toutes les analyses sont terminées.");
     });
+*/
+/*
+program.run;
 
 
-    program
-    .command("lireDossier", "Lire et analyser tous les fichiers d'un dossier")
-    .argument("<folder>", "Nom du dossier contenant les fichiers")
+/*
+
+program
+    .command("Option3", "Execute l'option 3 (disponibilités d’une salle)")
+    .argument("<salle>", "salle dont on veut les disponibilités")
+    .argument("<folder>", "nom du dossier contenant les fichiers")
     .action(async ({ logger, args }) => {
         const folderName = args.folder;
         const folderPath = path.join(__dirname, folderName);
-        const allResults = [];
 
-        fs.readdir(folderPath, (err, files) => {
-            if (err) {
-                return logger.warn(err);
-            }
+        logger.info(`Lecture des fichiers dans le dossier ${folderPath}`);
 
-            const promises = files.map(file => {
-                return new Promise((resolve, reject) => {
-                    const filePath = path.join(folderPath, file);
-                    fs.readFile(filePath, 'utf8', (err, data) => {
-                        if (err) {
-                            reject(err);
+        // Lire le contenu du dossier
+        const files = fs.readdirSync(folderPath);
+
+        for (const file of files) {
+            const filePath = path.join(folderPath, file);
+
+            try {
+                logger.info(`Lecture du fichier ${filePath}`);
+                const data = fs.readFileSync(filePath, 'utf8');
+
+                // Exécuter l'analyse
+                analyzer.parse(data);
+
+                const salle = args.salle;
+                const disponibilites = [];
+
+                analyzer.parsedUE.forEach((ue) => {
+                    ue.creneaux.forEach((creneau) => {
+                        if (creneau.salle === salle) {
+                            disponibilites.push({
+                                horaire: creneau.horaire,
+                                jour: creneau.jour,
+                            });
                         }
-
-                        var analyzer = new CruParser(false, false);
-                        analyzer.parse(data);
-                        allResults.push(analyzer.parsedUE);
-                        resolve();
                     });
                 });
-            });
 
-            Promise.all(promises)
-                .then(() => {
-                    allResults.forEach(parsedData => {
-                        logger.info(JSON.stringify(parsedData, null, 2));
+                const uniqueDisponibilites = [...new Set(disponibilites)];
+                if (uniqueDisponibilites.length > 0) {
+                    logger.info(`Disponibilités pour la salle ${args.salle} dans le fichier ${file}:`);
+                    uniqueDisponibilites.forEach(({ horaire, jour }) => {
+                        logger.info(`- ${jour} ${horaire}`);
                     });
-                    logger.info("Toutes les analyses sont terminées.");
-                })
-                .catch((err) => {
-                    logger.error(err);
-                });
-        });
+                } else {
+                    logger.info(`Aucune disponibilité trouvée pour la salle ${args.salle} dans le fichier ${file}.`);
+                }
+            } catch (err) {
+                // Gérer les erreurs éventuelles ici
+                logger.error(`Erreur lors de la lecture du fichier ${file}: ${err.message}`);
+            }
+        }
+
+        // Afficher un message une fois toutes les analyses terminées
+        logger.info("Toutes les analyses sont terminées.");
     });
+*/
 
-    
-module.exports = analyserDossier;
-
-
-program.run();
-
-
-
+program.run;
 
 program.run();
 
