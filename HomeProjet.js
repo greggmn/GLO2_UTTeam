@@ -1,5 +1,6 @@
 #!/usr/bin/env ts-node
 const readlineSync = require('readline-sync');
+const { exportData, importData } = require('./ExportImportModule');
 
 import('inquirer')
   .then((inquirerModule) => {
@@ -54,7 +55,9 @@ function actionAFaireAdmin(){
         "voir vos réservations",
         "annuler une réservation",
         "visualiser l’occupation des salles",
-        "créer et/ou modifier une salle"
+        "créer et/ou modifier une salle",
+        "exporter un emploi du temps",
+        "importer un emploi du temps"
       ];
 
       return inquirer.prompt([
@@ -113,6 +116,24 @@ demarrage()
 
                 break;
             case "créer et/ou modifier une salle":
+
+                break;
+            case "exporter un emploi du temps":
+                const ques = "Presse Enter + Entrez le path de l'emploi du temps (ex: SujetA_data\\edt1.cru):\n"
+                const ques2 ="Entrez le path du fichier dans lequel vous voulez exporter (ex: Export):\n"
+                const fileName = readlineSync.question(ques);
+                const folderName = readlineSync.question(ques2);
+
+                console.log('Réponse à la première question :', fileName);
+                console.log('Réponse à la deuxième question :', folderName);
+                exportData(fileName,folderName)
+
+                break;
+            case "importer un emploi du temps":
+                const ques3 = "Presse Enter + Entrez le nom du fichier a importer\n"
+                const filename = readlineSync.question(ques3);
+
+                importData(filename)
 
                 break;
         }
@@ -250,8 +271,6 @@ program
     });
 */
 
-program.run;
 
-program.run();
 
 
