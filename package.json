@@ -17,7 +17,7 @@
     "inquirer": "^9.2.12",
 
     "date-fns": "^2.30.0",
-
+    "nodejs": "^0.0.0",
     "readline-sync": "^1.4.10",
     "requirer": "^0.0.4",
     "vega": "^5.17.0",

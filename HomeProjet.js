@@ -230,7 +230,6 @@ program
                 });
 
                 const uniqueDisponibilites = [...new Set(disponibilites)];
-
                 if (uniqueDisponibilites.length > 0) {
                     logger.info(`Disponibilités pour la salle ${args.salle} dans le fichier ${file}:`);
                     uniqueDisponibilites.forEach(({ horaire, jour }) => {
