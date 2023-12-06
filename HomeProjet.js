@@ -167,6 +167,55 @@ program
     });
 
 
+    program
+    .command("lireDossier", "Lire et analyser tous les fichiers d'un dossier")
+    .argument("<folder>", "Nom du dossier contenant les fichiers")
+    .action(async ({ logger, args }) => {
+        const folderName = args.folder;
+        const folderPath = path.join(__dirname, folderName);
+        const allResults = [];
+
+        fs.readdir(folderPath, (err, files) => {
+            if (err) {
+                return logger.warn(err);
+            }
+
+            const promises = files.map(file => {
+                return new Promise((resolve, reject) => {
+                    const filePath = path.join(folderPath, file);
+                    fs.readFile(filePath, 'utf8', (err, data) => {
+                        if (err) {
+                            reject(err);
+                        }
+
+                        var analyzer = new CruParser(false, false);
+                        analyzer.parse(data);
+                        allResults.push(analyzer.parsedUE);
+                        resolve();
+                    });
+                });
+            });
+
+            Promise.all(promises)
+                .then(() => {
+                    allResults.forEach(parsedData => {
+                        logger.info(JSON.stringify(parsedData, null, 2));
+                    });
+                    logger.info("Toutes les analyses sont terminées.");
+                })
+                .catch((err) => {
+                    logger.error(err);
+                });
+        });
+    });
+
+    
+module.exports = analyserDossier;
+
+
+program.run();
+
+
 
 
 program.run();
