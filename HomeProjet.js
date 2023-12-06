@@ -249,8 +249,5 @@ program
     });
 */
 
-program.run;
-
-program.run();
 
 
