@@ -37,9 +37,6 @@ function analyserFichier(filePath) {
         throw err;
     }
 }
-
-// ... Le reste de votre code ...
-
 module.exports = { analyserDossier, analyserFichier, voirInfosSalles, calculerTauxOccupation, voirTauxOccupation };
 
 
