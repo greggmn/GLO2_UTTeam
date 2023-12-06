@@ -38,43 +38,6 @@ async function analyserFichier(filePath) {
     }
 }
 
-program
-.command('voirInfosSalles', 'Affiche les informations des salles')
-.action(async ({ logger }) => {
-    const folderPath = './SujetA_data';
-    try {
-        const donnees = await analyserDossier(folderPath);
-        console.log(donnees);
-        let infosSalles = {}; // Créer un objet pour stocker les infos par salle
-
-        // Remplir l'objet avec les données
-        donnees.forEach(ue => {
-            ue.creneaux.forEach(creneau => {
-                if (!infosSalles[creneau.salle]) {
-                    infosSalles[creneau.salle] = [];
-                }
-                infosSalles[creneau.salle].push({
-                    NbPlaces: creneau.nbplaces,
-                    Jour: creneau.jour,
-                    Horaire: creneau.horaire,
-                    GroupeCours: creneau.groupe_cours
-                });
-            });
-        });
-
-        // Afficher les informations
-        Object.keys(infosSalles).forEach(salle => {
-            logger.info(`Salle: ${salle}`);
-            infosSalles[salle].forEach(creneau => {
-                logger.info(`    NbPlaces: ${creneau.NbPlaces}, Jour: ${creneau.Jour}, Horaire: ${creneau.Horaire}, GroupeCours: ${creneau.GroupeCours}`);
-            });
-        });
-
-    } catch (err) {
-        logger.error("Erreur lors de l'affichage des informations des salles :", err);
-    }
-});
-
 function voirInfosSalles(donnees) {
     let infosSalles = {}; // Créer un objet pour stocker les infos par salle
 
@@ -102,8 +65,6 @@ function voirInfosSalles(donnees) {
     });
 }
 
-program.run();
-
 function calculerTauxOccupation(donnees) {
     const heuresOuvertureParJour = 12; // de 8h à 20h
     const joursOuvrables = 5; // Supposons qu'il y a 5 jours ouvrables dans une semaine
@@ -128,23 +89,6 @@ function calculerTauxOccupation(donnees) {
     return Object.entries(tauxOccupationSalles).sort((a, b) => b[1] - a[1]);
 }
 
-program
-.command('voirTauxOccupation', 'Affiche les salles par taux d\'occupation')
-.action(async ({ logger }) => {
-    const folderPath = './SujetA_data';
-    try {
-        const donnees = await analyserDossier(folderPath);
-        let sallesTrie = calculerTauxOccupation(donnees);
-
-        sallesTrie.forEach(([salle, taux]) => {
-            logger.info(`Salle: ${salle}, Taux d'occupation: ${taux.toFixed(2)}%`);
-        });
-
-    } catch (err) {
-        logger.error("Erreur lors de l'affichage des salles par taux d'occupation :", err);
-    }
-});
-
 function voirTauxOccupation(donnees) {
     const heuresOuvertureParJour = 12; // de 8h à 20h
     const joursOuvrables = 5; // Supposons qu'il y a 5 jours ouvrables dans une semaine
@@ -168,5 +112,3 @@ function voirTauxOccupation(donnees) {
 
     return Object.entries(tauxOccupationSalles).sort((a, b) => b[1] - a[1]);
 }
-
-program.run();
