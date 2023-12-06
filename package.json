@@ -13,7 +13,9 @@
     "@caporal/core": "^2.0.2",
     "caporal": "^1.4.0",
     "colors": "^1.4.0",
+    "inquirer": "^9.2.12",
     "readline-sync": "^1.4.10",
+    "requirer": "^0.0.4",
     "vega": "^5.17.0",
     "vega-lite": "^4.17.0"
   },
