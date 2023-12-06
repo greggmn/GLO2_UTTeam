@@ -114,6 +114,66 @@ program
     });
 
 
+
+function Option2_listerSallesDisponibles(jour, heure, folderPath='SujetA_data') {
+    const files = fs.readdirSync(folderPath);
+    const horaireRecherche = `${jour} ${heure}`;
+    const sallesOccupes = [];
+
+    for (const file of files) {
+        const filePath = path.join(folderPath, file);
+
+        try {
+            const data = fs.readFileSync(filePath, "utf8");
+            analyserFichier(data);
+        } catch (err) {
+            console.log(`Erreur lors de la lecture du fichier ${file}: ${err.message}`);
+        }
+    }
+
+    const sallesTotales = getSalleTotales(folderPath);
+    const sallesDisponibles = sallesTotales.filter((salle) => !sallesOccupes.includes(salle));
+
+    if (sallesDisponibles.length > 0) {
+        console.log(`Salles disponibles pour le ${jour} à ${heure} :`);
+        sallesDisponibles.forEach((salle) => {
+            console.log(`- ${salle}`);
+        });
+    } else {
+        console.log(`Aucune salle disponible pour le ${jour} à ${heure} dans tous les fichiers analysés.`);
+    }
+}
+Option2_listerSallesDisponibles('Me', '14:00', 'SujetA_data');
+
+function analyserFichier(data) {
+    // Implémentez votre logique d'analyse du fichier ici
+    // Note: La fonction analyserFichier n'est pas fournie dans le code que vous avez partagé,
+    // vous devrez l'implémenter en fonction des besoins spécifiques de votre application.
+}
+
+function getSalleTotales(folderPath) {
+    const files = fs.readdirSync(folderPath);
+    const salles = new Set();
+
+    for (const file of files) {
+        const filePath = path.join(folderPath, file);
+
+        try {
+            const data = fs.readFileSync(filePath, "utf8");
+            analyserFichier(data);
+            // Ajoutez ici la logique pour extraire les salles du fichier
+        } catch (err) {
+            console.log(`Erreur lors de la lecture du fichier ${file}: ${err.message}`);
+        }
+    }
+
+    return Array.from(salles);
+}
+
+
+
+
+
     function heureEstDansCreneau(heureRecherche, horaireCreneau) {
         if (horaireCreneau) {
             const [debutCreneau, finCreneau] = horaireCreneau.split('-');

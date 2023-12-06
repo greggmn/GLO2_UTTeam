@@ -3,6 +3,8 @@ const Creneau = require('./Creneau.js');
 const Ue = require('./UE.js');
 const creneau = require('./Creneau.js');
 const readlineSync = require('readline-sync');
+const { analyserDossier, analyserFichier, voirInfosSalles, calculerTauxOccupation, voirTauxOccupation } = require('./Spec_Util.js');
+const specsGreg = require('./SpecsGreg.js');
 
 var menuReservation = function(statut, identifiant){
 
@@ -12,7 +14,7 @@ var menuReservation = function(statut, identifiant){
     const reponseAction = readlineSync.question(choixAction);
 
     if (reponseAction === "2"){
-        mesDispos();
+        mesReservations();
     }
     else if (reponseAction === "1"){
 
@@ -55,7 +57,8 @@ var menuReservation = function(statut, identifiant){
         } while(matched===null)
         
 
-        //Fonction de Gregoire(jour, horaire) qui doit afficher toutes les dispos et retourner un tableau des créneaux dispos avec les UE
+        const donnees = analyserDossier("./SujetA_data");
+        console.log(voirInfosSalles(donnees));
 
         let salle;
         do {
@@ -97,7 +100,7 @@ var testDispo = function(nomSalle, horaire, jour, allCreneaux){
     return creneauExiste;
 }
 
-var mesDispos = function(){
+var mesReservations = function(){
 
 }
 
