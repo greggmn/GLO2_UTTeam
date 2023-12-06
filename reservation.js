@@ -3,6 +3,7 @@ const Creneau = require('./Creneau.js');
 const Ue = require('./UE.js');
 const creneau = require('./Creneau.js');
 const readlineSync = require('readline-sync');
+const { analyserDossier, analyserFichier, voirInfosSalles, calculerTauxOccupation, voirTauxOccupation } = require('./Spec_Util.js');
 
 var menuReservation = function(statut, identifiant){
 

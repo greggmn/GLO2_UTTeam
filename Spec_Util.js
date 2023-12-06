@@ -4,14 +4,14 @@ const fs = require('fs');
 const CruParser = require("./CruParserSansLog");
 const path = require('path');
 
-async function analyserDossier(folderPath) {
+function analyserDossier(folderPath) {
     try {
-        const files = await fs.promises.readdir(folderPath);
+        const files = fs.readdirSync(folderPath); // Utilise readdirSync pour la lecture synchrone
         let allResults = []; // Utiliser un seul tableau pour toutes les données
 
         for (const file of files) {
             const filePath = path.join(folderPath, file);
-            const data = await fs.promises.readFile(filePath, 'utf8');
+            const data = fs.readFileSync(filePath, 'utf8'); // Utilise readFileSync pour la lecture synchrone
             
             var analyzer = new CruParser(false, false);
             analyzer.parse(data);
@@ -24,9 +24,9 @@ async function analyserDossier(folderPath) {
     }
 }
 
-async function analyserFichier(filePath) {
+function analyserFichier(filePath) {
     try {
-        const data = await fs.promises.readFile(filePath, 'utf8');
+        const data = fs.readFileSync(filePath, 'utf8'); // Utilise readFileSync pour la lecture synchrone
             
         var analyzer = new CruParser(false, false);
         analyzer.parse(data);
@@ -34,9 +34,14 @@ async function analyserFichier(filePath) {
         return allResults;
     }
     catch (err) {
-    throw err;
+        throw err;
     }
 }
+
+// ... Le reste de votre code ...
+
+module.exports = { analyserDossier, analyserFichier, voirInfosSalles, calculerTauxOccupation, voirTauxOccupation };
+
 
 function voirInfosSalles(donnees) {
     let infosSalles = {}; // Créer un objet pour stocker les infos par salle
@@ -112,3 +117,5 @@ function voirTauxOccupation(donnees) {
 
     return Object.entries(tauxOccupationSalles).sort((a, b) => b[1] - a[1]);
 }
+
+module.exports = { analyserDossier, analyserFichier, voirInfosSalles, calculerTauxOccupation, voirTauxOccupation };

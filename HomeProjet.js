@@ -1,6 +1,8 @@
 #!/usr/bin/env ts-node
 const readlineSync = require('readline-sync');
 
+const { analyserDossier, analyserFichier, voirInfosSalles, calculerTauxOccupation, voirTauxOccupation } = require('./Spec_Util.js');
+
 import('inquirer')
   .then((inquirerModule) => {
     const inquirer = inquirerModule.default;
