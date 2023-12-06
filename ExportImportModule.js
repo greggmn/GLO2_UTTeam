@@ -44,7 +44,24 @@ async function importData(filename) {
     }
 }
 
+function CRUification(data) {
+    let result = '';
+
+    for (const course of data) {
+        result += `+${course.code}\n`;
+        if (Array.isArray(course.creneaux) && course.creneaux.length > 0) {
+            for (const creneau of course.creneaux) {
+                const slot = creneau;
+                result += `1,${slot.type || ''},P=${slot.nbplaces || ''},H=${slot.jour || ''} ${slot.horaire || ''},F1,S=${slot.salle || ''}//\n`;
+
+            }
+        }
+    }
+    return result;
+}
+
 module.exports = {
     exportData,
-    importData
+    importData,
+    CRUification
 };

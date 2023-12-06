@@ -3,7 +3,7 @@
 
 const {program} = require('@caporal/core');
 const readlineSync = require('readline-sync');
-const { exportData, importData } = require('./ExportImportModule');
+const { exportData, importData, CRUification } = require('./ExportImportModule');
 
 import('inquirer')
   .then((inquirerModule) => {
