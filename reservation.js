@@ -120,7 +120,6 @@ var mesReservations = function(donnees, identifiant){
             }
         });
     });
-
     return reservations;
 }
 

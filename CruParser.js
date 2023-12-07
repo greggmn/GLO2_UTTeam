@@ -75,7 +75,6 @@ CruParser.prototype.check = function(s, input){
 // expect : expect the next symbol to be s.
 CruParser.prototype.expect = function(s, input){
 	if(s == this.next(input)){
-		console.log("Reckognized! "+s)
 		return true;
 	}else{
 		this.errMsg("symbol "+s+" doesn't match", input);
@@ -144,7 +143,6 @@ CruParser.prototype.creneaux = function (input, curUE){
 CruParser.prototype.type = function(input){
 	var curS = this.next(input);
 	var curS = this.next(input);
-	console.log("curS=" + curS);
 	if(matched = curS.match(/[CDT]\d/)){
 		return matched[0];
 	}else{
@@ -155,7 +153,6 @@ CruParser.prototype.type = function(input){
 // nbplaces = “P=” 2*3DIGIT
 CruParser.prototype.nbplaces = function(input){
 	var curS = this.next(input);
-	console.log("curS=" + curS);
 	if(matched = curS.match(/\d{1,3}/)){
 		return matched[0];
 	}else{
@@ -166,7 +163,6 @@ CruParser.prototype.nbplaces = function(input){
 // jour = “H=” (“L”/”MA”/”ME”/”J”/”V”/”S”) WSP
 CruParser.prototype.jour = function(input){
 	var curS = this.next(input);
-	console.log("curS=" + curS);
 	if(matched = curS.match(/(L|MA|ME|J|V|S)/)){
 		return matched[0];
 	}else{
@@ -177,7 +173,6 @@ CruParser.prototype.jour = function(input){
 // horaire = 1*2DIGIT “:” 2DIGIT “-” 1*2DIGIT “:” 2DIGIT
 CruParser.prototype.horaire = function(input){
 	var curS = this.next(input);
-	console.log("curS=" + curS);
 	if(matched = curS.match(/\d{1,2}:\d{2}-\d{1,2}:\d{2}/)){
 		return matched[0];
 	}else{
@@ -188,7 +183,6 @@ CruParser.prototype.horaire = function(input){
 // groupe_cours = “F” 1DIGIT
 CruParser.prototype.groupe_cours = function(input){
 	var curS = this.next(input);
-	console.log("curS=" + curS);
 	if(matched = curS.match(/F\d|[A-Z]{1,2}/)){
 		return matched[0];
 	}else{
@@ -200,7 +194,6 @@ CruParser.prototype.groupe_cours = function(input){
 CruParser.prototype.salle = function(input){
 	var curS = this.next(input);
 	matched = curS.match(/([A-Za-z]\d{3}|EXT\d)/)
-	console.log("curS=" + curS);
 	if(matched != null){
 		return matched[0];
 	}else{
