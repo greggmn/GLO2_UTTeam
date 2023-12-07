@@ -23,24 +23,6 @@ const inscription = [
 ];
 
 
-const actionAFaire = [
-    {
-        type: 'rawlist',
-        name: 'choix',
-        message: "Choisissez l'action que vous souhaitez réaliser:",
-        choices: [
-            "vérifier la validité du format CRU",
-            "consulter les salles disponibles selon le créneau horaire",
-            "consulter les disponibilités d’une salle",
-            "consulter les informations d'une salle",
-            "gérer les réservations",
-            "annuler une réservation",
-            "exit"
-          ],
-    },
-];
-
-
 const actionAFaireAdmin = [
     {
         type: 'rawlist',
@@ -73,7 +55,7 @@ async function runMenu(){
     identifiant = readlineSync.question(question1);
 
     while (enCours){       
-        const {choix: action} =  await inquirer.prompt(actionAFaire);
+        const {choix: action} =  await inquirer.prompt(actionAFaireAdmin);
             
         switch(action){
             case "vérifier la validité du format CRU":
@@ -97,22 +79,36 @@ async function runMenu(){
     
                 break;
             case "créer et/ou modifier une salle":
-    
+                if (statut !== "administrateur"){
+                    console.log("Vous n'avez pas accès à cette fonction");
+                }
+                else{
+
+                }
                 break;
             case "exporter un emploi du temps":
-                const ques = "Presse Enter + Entrez le path de l'emploi du temps (ex: SujetA_data\\edt1.cru):\n"
+                if (statut !== "administrateur"){
+                    console.log("Vous n'avez pas accès à cette fonction");
+                }
+                else{
+                    const ques = "Presse Enter + Entrez le path de l'emploi du temps (ex: SujetA_data\\edt1.cru):\n"
                 const ques2 ="Entrez le path du fichier dans lequel vous voulez exporter (ex: Export):\n"
                 const fileName = readlineSync.question(ques);
                 const folderName = readlineSync.question(ques2);
                 exportData(fileName,folderName)
-    
+                }
+                
                 break;
             case "importer un emploi du temps":
-                const ques3 = "Presse Enter + Entrez le nom du fichier a importer\n"
-                const filename = readlineSync.question(ques3);
-    
-                importData(filename)
-    
+                if (statut !== "administrateur"){
+                    console.log("Vous n'avez pas accès à cette fonction");
+                }
+                else{
+                    const ques3 = "Presse Enter + Entrez le nom du fichier a importer\n"
+                    const filename = readlineSync.question(ques3);
+        
+                    importData(filename)
+                }
                 break;
     
             case "exit":
