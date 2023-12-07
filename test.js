@@ -1,3 +1,5 @@
+#!/usr/bin/env ts-node
+
 
 const {program} = require('@caporal/core');
 const readlineSync = require('readline-sync');
@@ -123,5 +125,9 @@ async function runMenu(){
 }
 runMenu();
   })
+
+
+
+
 
 

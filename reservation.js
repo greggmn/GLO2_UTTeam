@@ -1,12 +1,15 @@
 
 const Creneau = require('./Creneau.js');
 const Ue = require('./UE.js');
-const creneau = require('./Creneau.js');
 const readlineSync = require('readline-sync');
-const { analyserDossier, analyserFichier, voirInfosSalles, calculerTauxOccupation, voirTauxOccupation } = require('./Spec_Util.js');
-const specsGreg = require('./SpecsGreg.js');
+const { analyserDossier } = require('./Spec_Util.js');
+
+
 
 var menuReservation = function(statut, identifiant){
+
+    const donnees = analyserDossier("./SujetA_data");
+    //console.log(donnees[0]);
 
     console.log("Tapez 1 pour réserver une salle ");
     console.log("Tapez 2 pour réserver voir vos réservations");
@@ -14,14 +17,14 @@ var menuReservation = function(statut, identifiant){
     const reponseAction = readlineSync.question(choixAction);
 
     if (reponseAction === "2"){
-        mesReservations();
+        mesReservations(donnees, identifiant);
     }
     else if (reponseAction === "1"){
 
+        let reponse;
+        let nomUe;
         if (statut === "prof"){
-
-            let reponse;
-            let nomUe;
+            
             do{
                 console.log("Tapez 1 pour réserver la salle sur un créneau particulier");
                 console.log("Tapez 2 pour réserver la salle tout un semestre");
@@ -56,27 +59,27 @@ var menuReservation = function(statut, identifiant){
                 console.log("Horaire saisi invalide");
         } while(matched===null)
         
-
-        const donnees = analyserDossier("./SujetA_data");
-        console.log(voirInfosSalles(donnees));
+        var sallesDispos = sallesDispoSelonHoraire(donnees, horaire, jour);        
 
         let salle;
         do {
             const choixSalle = "Entrez le nom de la salle à réserver \n";
             salle = readlineSync.question(choixSalle);
-            var test = testDispo(salle, horaire, jour,allCreneaux);
+            var test = testDispo(salle, sallesDispos); 
+            if (test === false)
+                console.log("La salle saisie n'est pas disponible");
         } while (test === false)
 
         
         if (reponse === "1"){
-            reserver(salle, jour, horaire, nomUe);
+            reserver(salle, jour, horaire, nomUe, donnees); 
         } else if (reponse === "2"){
-            reserverSemestre(salle, jour, horaire, nomUe);
+            reserverSemestre(salle, jour, horaire, nomUe, donnees, identifiant); 
         }
 
             
         if (statut === "eleve" | "élève"){
-            reserver(salle, jour, horaire,"Réservation");
+            reserver(salle, jour, horaire,"Réservation", donnees, identifiant); 
         }
 
     }
@@ -84,24 +87,66 @@ var menuReservation = function(statut, identifiant){
 }
 
 
-var reserver = function(nomSalle, jour, horaire, nomUe){
-    creneau = new Creneau("R0", "0", jour, horaire, "F1", nomSalle);
-    ue = new Ue(nomUe, [creneau]);
+var reserver = function(nomSalle, jour, horaire, nomUe, donnees, identifiant){
+    const creneau = new Creneau("R0", "0", jour, horaire, identifiant, nomSalle);
+    const ue = new Ue(nomUe, [creneau]);
+    donnees.push(ue);
+    console.log("Salle réservée!");
 }
 
 
-var reserverSemestre = function (nomSalle, jour, horaire,nomUe){
-    creneau = new Creneau("R0", "0", jour, horaire, "F1", nomSalle);
-    ue = new Ue(nomUe, [creneau]);
+var reserverSemestre = function (nomSalle, jour, horaire,nomUe, donnees, identifiant){
+    const creneau = new Creneau("R0", "0", jour, horaire, identifiant, nomSalle);
+    const ue = new Ue(nomUe, [creneau]);
+    donnees.push(ue);
+    console.log("Salle réservée!");
 }
 
-var testDispo = function(nomSalle, horaire, jour, allCreneaux){
-    let creneauExiste = allCreneaux.some(creneau => creneau.salle === nomSalle & creneau.horaire === horaire & creneau.jour === jour);
-    return creneauExiste;
+var testDispo = function(nomSalle, sallesDispos){
+    let possibiliteReservation = sallesDispos.includes(nomSalle);
+    return possibiliteReservation;
 }
 
-var mesReservations = function(){
+var mesReservations = function(donnees, identifiant){
 
+    console.log("Vos réservations: ");
+
+    let reservations = [];
+    donnees.forEach(ue => {
+        ue.creneaux.forEach(creneau => {
+            if (creneau.groupe_cours === identifiant) {
+                reservations.push(creneau);
+                console.log("Salle " + creneau.salle + ", horaire: " + creneau.horaire);
+            }
+        });
+    });
+
+    return reservations;
 }
 
-menuReservation("prof");
+
+var sallesDispoSelonHoraire = function(donnees, horaireRecherche, jour){
+    console.log("Salles disponibles et en accord avec votre recherche: ");
+    let allSalles = [];
+    let sallesIndispo = [];
+    donnees.forEach(ue => {
+        ue.creneaux.forEach(creneau => {
+            if (allSalles.includes(creneau.salle) === false) {
+                allSalles.push(creneau.salle);
+            }
+            if (creneau.horaire === horaireRecherche && creneau.jour === jour){
+                sallesIndispo.push(creneau.salle);
+            }
+        });
+    });
+
+    allSalles = allSalles.filter(element => !sallesIndispo.includes(element));
+
+    allSalles.forEach(salle => {
+        console.log(salle);
+    });
+
+    return allSalles;
+}
+
+module.exports = {menuReservation};

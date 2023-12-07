@@ -142,8 +142,9 @@ function Option2_listerSallesDisponibles(jour, heure, folderPath='SujetA_data') 
     } else {
         console.log(`Aucune salle disponible pour le ${jour} à ${heure} dans tous les fichiers analysés.`);
     }
+    return sallesDisponibles;
 }
-Option2_listerSallesDisponibles('Me', '14:00', 'SujetA_data');
+
 
 function analyserFichier(data) {
     // Implémentez votre logique d'analyse du fichier ici
@@ -531,6 +532,6 @@ program
 
 
 
-program.run();
+//program.run();
 //}
-//module.exports = {initCommandes};
+module.exports = {getSalleTotales, heureEstDansCreneau, Option2_listerSallesDisponibles};
