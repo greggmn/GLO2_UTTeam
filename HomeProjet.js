@@ -3,6 +3,7 @@ const {program} = require('@caporal/core');
 const readlineSync = require('readline-sync');
 const { exportData, importData, CRUification } = require('./ExportImportModule')
 const {menuReservation} = require('./reservation');;
+const {sallesDispoSelonHoraire, PourcentageOccupation, listerDisponibilitesSalle, calculateHoursBetween, calculateTotalHoursAvailable, calculateTotalOccupiedHours} = require('./SpecsGregFinal');
 
 import('inquirer')
   .then((inquirerModule) => {
@@ -62,13 +63,13 @@ async function runMenu(){
     
                 break;
             case "consulter les salles disponibles selon le créneau horaire":
-    
+                    sallesDispoSelonHoraire();
                 break;
             case "consulter les disponibilités d’une salle":
-    
+                listerDisponibilitesSalle();
                 break;
             case "consulter les informations d'une salle":
-    
+
                 break;
             case "gérer les réservations":
                 menuReservation(statut, identifiant);
@@ -76,7 +77,7 @@ async function runMenu(){
             case "annuler une réservation":
                 break;
             case "visualiser l’occupation des salles":
-    
+                PourcentageOccupation();
                 break;
             case "créer et/ou modifier une salle":
                 if (statut !== "administrateur"){
