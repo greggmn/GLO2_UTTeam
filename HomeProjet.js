@@ -3,6 +3,8 @@ const {program} = require('@caporal/core');
 const readlineSync = require('readline-sync');
 const { exportData, importData, CRUification } = require('./ExportImportModule')
 const {menuReservation} = require('./reservation');;
+const { analyserDossier } = require('./Spec_Util.js');
+
 
 import('inquirer')
   .then((inquirerModule) => {
@@ -51,6 +53,8 @@ async function runMenu(){
     const {choix} = await inquirer.prompt(inscription);
     statut = choix;
 
+    let donnees = analyserDossier("./SujetA_data");
+
     const question1 = 'Entrez votre identifiant \n';
     identifiant = readlineSync.question(question1);
 
@@ -71,7 +75,7 @@ async function runMenu(){
     
                 break;
             case "gérer les réservations":
-                menuReservation(statut, identifiant);
+                donnees = menuReservation(statut, identifiant, donnees);
                 break;
             case "annuler une réservation":
                 break;
