@@ -1,8 +1,9 @@
+
 const readlineSync = require('readline-sync');
 const { exportData, importData, CRUification } = require('./ExportImportModule')
 const {menuReservation} = require('./reservation');;
-const { analyserDossier, checkCru } = require('./Spec_Util.js');
-const {sallesDispoSelonHoraire, PourcentageOccupation, listerDisponibilitesSalle} = require('./OccupationSalles.js');
+const { analyserDossier, checkCru, voirInfosSalles, voirTauxOccupation } = require('./Spec_Util.js');
+const {sallesDispoSelonHoraire, PourcentageOccupation, listerDisponibilitesSalle, creerSalle} = require('./OccupationSalles.js');
 
 // inquirer permet d'améliorer le design du menu
 import('inquirer')
@@ -37,7 +38,7 @@ const actionAFaireAdmin = [
             "gérer les réservations",
             "annuler une réservation",
             "visualiser l’occupation des salles",
-            "créer et/ou modifier une salle",
+            "créer une salle",
             "exporter un emploi du temps",
             "importer un emploi du temps",
             "exit"
@@ -73,9 +74,14 @@ async function runMenu(){
             case "consulter les disponibilités d’une salle":
                 listerDisponibilitesSalle();
                 break;
-            //spec 4
+            //spec 4 , 12
             case "consulter les informations d'une salle":
-    
+                if (statut === "administrateur"){
+                    console.log(voirTauxOccupation(donnees));
+                }
+                else {
+                    console.log(voirInfosSalles(donnees));
+                }
                 break;
             //specs 5, 5.1, 6, 7, 8, 9
             case "gérer les réservations":
@@ -91,11 +97,15 @@ async function runMenu(){
                 }
                 break;
             //spec 13
-            case "créer et/ou modifier une salle":
+            case "créer une salle":
                 if (statut !== "administrateur"){
                     console.log("Vous n'avez pas accès à cette fonction");
+
                 }
                 else{
+                    const room = "Presse Enter + Entrez le nom de la salle:\n"
+                    const salle = readlineSync.question(room);
+                    creerSalle(salle)
 
                 }
                 break;
