@@ -6,9 +6,7 @@ const { analyserDossier } = require('./Spec_Util.js');
 const ics = require('ics');
 
 
-var menuReservation = function(statut, identifiant){
-
-    const donnees = analyserDossier("./SujetA_data");
+var menuReservation = function(statut, identifiant,donnees){
     //console.log(donnees[0]);
 
     console.log("Tapez 1 pour réserver une salle ");
@@ -96,8 +94,7 @@ var menuReservation = function(statut, identifiant){
 
         annulerReservation(identifiant, nomSalle, jour, horaire, donnees);
     }
-
-
+    return donnees;
 }
 
 
