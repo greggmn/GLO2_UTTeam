@@ -4,7 +4,7 @@ function creerFichierIcs(nomSalle, jour, horaire, identifiant) {
     const [heureDebut, heureFin] = horaire.split('-').map(h => h.trim());
     const [heure, minute] = heureDebut.split(':').map(h => parseInt(h, 10));
 
-    // Convertir le jour en une date (vous devrez définir une logique pour cela)
+    // Convertir le jour en une date
     const date = convertirJourEnDate(jour);
 
     const event = {

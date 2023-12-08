@@ -1,3 +1,4 @@
+//Définit la structure d'un objet Creneau
 var creneau = function(type, nbplaces, jour, horaire, groupe_cours, salle){
     this.type = type;
     this.nbplaces = nbplaces;

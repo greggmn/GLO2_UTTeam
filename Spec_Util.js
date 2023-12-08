@@ -1,15 +1,15 @@
-const { program } = require('@caporal/core');
 const readlineSync = require('readline-sync');
 const fs = require('fs');
-const CruParser = require("./CruParserSansLog");
+const CruParser = require("./CruParser");
 const path = require('path');
 
+//Teste si un fichier saisi respecte l'ensemble des règles du format Cru
 function checkCru(){
 
     console.log("Vérifier si un fichier est bel et bien au format Cru");
 
     const questionPath = 'Entrez le path du fichier à checker:  \n';
-    path = readlineSync.question(questionPath);
+    const path = readlineSync.question(questionPath);
 
     fs.readFile(path, 'utf8', function (err,data) {
         if (err) {
@@ -61,8 +61,6 @@ function analyserFichier(filePath) {
         throw err;
     }
 }
-module.exports = { analyserDossier, analyserFichier, voirInfosSalles, calculerTauxOccupation, voirTauxOccupation, checkCru };
-
 
 function voirInfosSalles(donnees) {
     let infosSalles = {}; // Créer un objet pour stocker les infos par salle
@@ -139,4 +137,4 @@ function voirTauxOccupation(donnees) {
     return Object.entries(tauxOccupationSalles).sort((a, b) => b[1] - a[1]);
 }
 
-module.exports = { analyserDossier, analyserFichier, voirInfosSalles, calculerTauxOccupation, voirTauxOccupation };
+module.exports = { analyserDossier, analyserFichier, voirInfosSalles, calculerTauxOccupation, voirTauxOccupation, checkCru };

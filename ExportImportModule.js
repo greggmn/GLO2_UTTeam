@@ -1,6 +1,6 @@
 const fs = require('fs').promises;
 const path = require('path');
-const CruParser = require('./CruParserSansLog');
+const CruParser = require('./CruParser');
 
 async function exportData(fileName, folderName) {
     const folderPath = path.join(__dirname, folderName);
