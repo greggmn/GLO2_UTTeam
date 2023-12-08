@@ -3,6 +3,10 @@ const path = require('path');
 const CruParser = require('./CruParser.js'); // Assurez-vous d'importer le bon module
 const readlineSync = require('readline-sync');
 const { analyserDossier } = require('./Spec_Util.js');
+const ue = require('./UE.js');
+const creneau = require('./Creneau')
+const {da} = require("date-fns/locale");
+
 
 
 function PourcentageOccupation(folderPath= 'SujetA_data') {
@@ -236,10 +240,24 @@ var sallesDispoSelonHoraire = function() {
     return allSalles;
 }
 
+function creerSalle(salle){
+    const folderPath= 'SujetA_data'
+    const data = analyserDossier(folderPath)
+    const newcrenau = new creneau('','','','','',salle)
+    const newue = new ue('new',[newcrenau])
 
+    try {
+        data.push(newue)
+        console.log(`Salle ${salle} créer avec succès`);
+    }catch (err){
+        console.log(`Erreur lors de la creation de la salle : ${err.message}`);
+    }
+    return data
+}
 // Exemple d'utilisation
 
 //PourcentageOccupation();
 //listerDisponibilitesSalle();
 //sallesDispoSelonHoraire();
-module.exports= {sallesDispoSelonHoraire, PourcentageOccupation, listerDisponibilitesSalle, calculateHoursBetween, calculateTotalHoursAvailable, calculateTotalOccupiedHours};
+creerSalle()
+module.exports= {sallesDispoSelonHoraire, PourcentageOccupation, listerDisponibilitesSalle, calculateHoursBetween, calculateTotalHoursAvailable, calculateTotalOccupiedHours, creerSalle};
