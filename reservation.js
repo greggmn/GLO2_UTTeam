@@ -152,12 +152,15 @@ var mesReservations = function(donnees, identifiant){
     });
 
     if (reservations.length > 0) {
-        reservations.forEach((reservation, index) => {
-            console.log(`Génération du fichier iCalendar pour la réservation ${index + 1}`);
-            creerFichierIcs(reservation.salle, reservation.jour, reservation.horaire, identifiant);
-        });
-    } else {
-        console.log("Aucune réservation trouvée.");
+        // demander si l'utilisateur veut exporter ses réservations
+        const choixExport = "Voulez-vous exporter vos réservations dans un fichier ics ? (oui/non) \n";
+        let reponseExport = readlineSync.question(choixExport);
+        if (reponseExport === "oui") {
+            creerFichierIcs(reservations, identifiant);
+    }
+        else {
+            console.log("Vous n'avez pas exporté vos réservations");
+        }
     }
 }
 
@@ -209,31 +212,34 @@ var annulerReservation = function(identifiant, nomSalle, jour, horaire, donnees,
     }
 };
 
-function creerFichierIcs(nomSalle, jour, horaire, identifiant) {
-    const [heureDebut, heureFin] = horaire.split('-').map(h => h.trim());
-    const [heure, minute] = heureDebut.split(':').map(h => parseInt(h, 10));
+function creerFichierIcs(events, identifiant) {
+    let icsEvents = [];
 
-    // Convertir le jour en une date 
-    const date = convertirJourEnDate(jour);
+    events.forEach(event => {
+        const [heureDebut, heureFin] = event.horaire.split('-').map(h => h.trim());
+        const [heure, minute] = heureDebut.split(':').map(h => parseInt(h, 10));
+        const date = convertirJourEnDate(event.jour);
 
-    const event = {
-        start: [date.getFullYear(), date.getMonth() + 1, date.getDate(), heure, minute],
-        end: [date.getFullYear(), date.getMonth() + 1, date.getDate(), ...heureFin.split(':').map(h => parseInt(h, 10))],
-        title: `Réservation de la salle ${nomSalle}`,
-        description: `Réservation effectuée par ${identifiant}`,
-        location: nomSalle,
-        status: 'CONFIRMED',
-        busyStatus: 'BUSY'
-    };
+        const icsEvent = {
+            start: [date.getFullYear(), date.getMonth() + 1, date.getDate(), heure, minute],
+            end: [date.getFullYear(), date.getMonth() + 1, date.getDate(), ...heureFin.split(':').map(h => parseInt(h, 10))],
+            title: `Réservation de la salle ${event.nomSalle}`,
+            description: `Réservation effectuée par ${identifiant}`,
+            location: event.nomSalle,
+            status: 'CONFIRMED',
+            busyStatus: 'BUSY'
+        };
 
-    ics.createEvent(event, (error, value) => {
-        if (error) {
-            console.log(error);
-            return;
-        }
-
-        fs.writeFileSync(`${identifiant}-${nomSalle}-reservation.ics`, value);
+        ics.createEvent(icsEvent, (error, value) => {
+            if (error) {
+                console.log(error);
+                return;
+            }
+            icsEvents.push(value);
+        });
     });
+
+    fs.writeFileSync(`${identifiant}-reservations.ics`, icsEvents.join('\r\n'));
 }
 
 function convertirJourEnDate(jour) {

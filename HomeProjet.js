@@ -1,7 +1,7 @@
 const readlineSync = require('readline-sync');
 const { exportData, importData, CRUification } = require('./ExportImportModule')
 const {menuReservation} = require('./reservation');;
-const { analyserDossier, checkCru } = require('./Spec_Util.js');
+const { analyserDossier, checkCru, voirInfosSalles, voirTauxOccupation } = require('./Spec_Util.js');
 const {sallesDispoSelonHoraire, PourcentageOccupation, listerDisponibilitesSalle} = require('./OccupationSalles.js');
 
 // inquirer permet d'améliorer le design du menu
@@ -73,9 +73,14 @@ async function runMenu(){
             case "consulter les disponibilités d’une salle":
                 listerDisponibilitesSalle();
                 break;
-            //spec 4
+            //spec 4 , 12
             case "consulter les informations d'une salle":
-    
+                if (statut === "administrateur"){
+                    console.log(voirTauxOccupation(donnees));
+                }
+                else {
+                    console.log(voirInfosSalles(donnees));
+                }
                 break;
             //specs 5, 5.1, 6, 7, 8, 9
             case "gérer les réservations":
