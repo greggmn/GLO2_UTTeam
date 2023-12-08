@@ -4,6 +4,7 @@ const Ue = require('./UE.js');
 const readlineSync = require('readline-sync');
 const { analyserDossier } = require('./Spec_Util.js');
 const ics = require('ics');
+const fs = require('fs');
 
 
 var menuReservation = function(statut, identifiant,donnees){
@@ -11,6 +12,7 @@ var menuReservation = function(statut, identifiant,donnees){
 
     console.log("Tapez 1 pour réserver une salle ");
     console.log("Tapez 2 pour voir vos réservations");
+    console.log("Tapez 3 pour annuler une réservation");
     const choixAction = 'Choix de réservation: \n';
     const reponseAction = readlineSync.question(choixAction);
 
@@ -21,7 +23,7 @@ var menuReservation = function(statut, identifiant,donnees){
 
         let reponse;
         let nomUe;
-        if (statut === "prof"){
+        if (statut === "professeur"){
             
             do{
                 console.log("Tapez 1 pour réserver la salle sur un créneau particulier");
@@ -70,7 +72,7 @@ var menuReservation = function(statut, identifiant,donnees){
 
         
         if (reponse === "1"){
-            reserver(salle, jour, horaire, nomUe, donnees); 
+            reserver(salle, jour, horaire, nomUe, donnees,identifiant); 
         } else if (reponse === "2"){
             reserverSemestre(salle, jour, horaire, nomUe, donnees, identifiant); 
         }
@@ -83,6 +85,9 @@ var menuReservation = function(statut, identifiant,donnees){
     }
     else if (reponseAction === "3") {
         console.log("Annulation d'une réservation");
+        const choixUe = "Entrez le nom de l'UE pour laquelle vous voulez annuler une réservation: \n";
+        let nomUe = readlineSync.question(choixUe);
+
         const choixSalle = "Entrez le nom de la salle de la réservation à annuler: \n";
         let nomSalle = readlineSync.question(choixSalle);
 
@@ -132,20 +137,15 @@ var mesReservations = function(donnees, identifiant){
     });
 
     if (reservations.length > 0) {
-        const choix = readlineSync.question('Voulez-vous générer un fichier iCalendar pour une de ces réservations ? (oui/non) \n');
-        if (choix.toLowerCase() === 'oui') {
-            const index = parseInt(readlineSync.question('Entrez le numéro de la réservation pour laquelle générer le fichier iCalendar : \n'));
-            if (index > 0 && index <= reservations.length) {
-                const reservation = reservations[index - 1];
-                creerFichierIcs(reservation.salle, reservation.jour, reservation.horaire, identifiant);
-            } else {
-                console.log("Choix invalide.");
-            }
-        }
+        reservations.forEach((reservation, index) => {
+            console.log(`Génération du fichier iCalendar pour la réservation ${index + 1}`);
+            creerFichierIcs(reservation.salle, reservation.jour, reservation.horaire, identifiant);
+        });
     } else {
         console.log("Aucune réservation trouvée.");
     }
 }
+
 
 
 var sallesDispoSelonHoraire = function(donnees, horaireRecherche, jour){
@@ -171,26 +171,27 @@ var sallesDispoSelonHoraire = function(donnees, horaireRecherche, jour){
 
     return allSalles;
 }
-
-var annulerReservation = function(identifiant, nomSalle, jour, horaire, donnees) {
+// const creneau = new Creneau("R0", "0", jour, horaire, identifiant, nomSalle);
+// const ue = new Ue(nomUe, [creneau]);
+// donnees.push(ue);
+// console.log("Salle réservée!");
+// }
+var annulerReservation = function(identifiant, nomSalle, jour, horaire, donnees, nomUe) {
     let reservationFound = false;
 
     for (let i = 0; i < donnees.length; i++) {
         let ue = donnees[i];
-        for (let j = 0; j < ue.creneaux.length; j++) {
-            let creneau = ue.creneaux[j];
-            if (creneau.groupe_cours === identifiant && creneau.salle === nomSalle && creneau.jour === jour && creneau.horaire === horaire) {
-                ue.creneaux.splice(j, 1);
-                reservationFound = true;
-                console.log("Réservation annulée avec succès.");
-                break;
+        if (ue.nom === nomUe) { 
+            for (let j = 0; j < ue.creneaux.length; j++) {
+                let creneau = ue.creneaux[j];
+                if (creneau.groupe_cours === identifiant && creneau.salle === nomSalle && creneau.jour === jour && creneau.horaire === horaire) {
+                    reservationFound = true;
+                    ue.creneaux.splice(j, 1);
+                    console.log("Réservation annulée.");
+                }
             }
         }
-        if (reservationFound) {
-            break;
-        }
     }
-
     if (!reservationFound) {
         console.log("Aucune réservation trouvée correspondant à ces détails.");
     }
