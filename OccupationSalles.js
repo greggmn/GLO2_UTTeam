@@ -248,7 +248,7 @@ function creerSalle(salle){
 
     try {
         data.push(newue)
-        console.log(`Salle ${salle} créer avec succès`);
+        console.log(`Salle ${salle} créee avec succès`);
     }catch (err){
         console.log(`Erreur lors de la creation de la salle : ${err.message}`);
     }
@@ -259,5 +259,5 @@ function creerSalle(salle){
 //PourcentageOccupation();
 //listerDisponibilitesSalle();
 //sallesDispoSelonHoraire();
-creerSalle()
+
 module.exports= {sallesDispoSelonHoraire, PourcentageOccupation, listerDisponibilitesSalle, calculateHoursBetween, calculateTotalHoursAvailable, calculateTotalOccupiedHours, creerSalle};
