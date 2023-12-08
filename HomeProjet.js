@@ -1,9 +1,8 @@
 
 const {program} = require('@caporal/core');
 const readlineSync = require('readline-sync');
-const { exportData, importData, CRUification } = require('./ExportImportModule');
-const {menuReservation} = require('./reservation');
-const {checkCru} = require('./Spec_Util');
+const { exportData, importData, CRUification } = require('./ExportImportModule')
+const {menuReservation} = require('./reservation');;
 
 import('inquirer')
   .then((inquirerModule) => {
@@ -60,7 +59,7 @@ async function runMenu(){
             
         switch(action){
             case "vérifier la validité du format CRU":
-                checkCru();
+    
                 break;
             case "consulter les salles disponibles selon le créneau horaire":
     
