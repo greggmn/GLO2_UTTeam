@@ -3,7 +3,7 @@ const Creneau = require('./Creneau.js');
 const Ue = require('./UE.js');
 const readlineSync = require('readline-sync');
 const { analyserDossier } = require('./Spec_Util.js');
-
+const ics = require('ics');
 
 
 var menuReservation = function(statut, identifiant){
@@ -12,7 +12,7 @@ var menuReservation = function(statut, identifiant){
     //console.log(donnees[0]);
 
     console.log("Tapez 1 pour réserver une salle ");
-    console.log("Tapez 2 pour réserver voir vos réservations");
+    console.log("Tapez 2 pour voir vos réservations");
     const choixAction = 'Choix de réservation: \n';
     const reponseAction = readlineSync.question(choixAction);
 
@@ -83,6 +83,20 @@ var menuReservation = function(statut, identifiant){
         }
 
     }
+    else if (reponseAction === "3") {
+        console.log("Annulation d'une réservation");
+        const choixSalle = "Entrez le nom de la salle de la réservation à annuler: \n";
+        let nomSalle = readlineSync.question(choixSalle);
+
+        const choixJour = "Entrez le jour de la réservation à annuler (ex: L, MA, ME): \n";
+        let jour = readlineSync.question(choixJour);
+
+        const choixHoraire = "Entrez l'horaire de la réservation à annuler (ex: 10:00 - 12:00): \n";
+        let horaire = readlineSync.question(choixHoraire);
+
+        annulerReservation(identifiant, nomSalle, jour, horaire, donnees);
+    }
+
 
 }
 
@@ -108,7 +122,6 @@ var testDispo = function(nomSalle, sallesDispos){
 }
 
 var mesReservations = function(donnees, identifiant){
-
     console.log("Vos réservations: ");
 
     let reservations = [];
@@ -116,11 +129,25 @@ var mesReservations = function(donnees, identifiant){
         ue.creneaux.forEach(creneau => {
             if (creneau.groupe_cours === identifiant) {
                 reservations.push(creneau);
-                console.log("Salle " + creneau.salle + ", horaire: " + creneau.horaire);
+                console.log("Salle " + creneau.salle + ", horaire: " + creneau.horaire + ", jour: " + creneau.jour);
             }
         });
     });
-    return reservations;
+
+    if (reservations.length > 0) {
+        const choix = readlineSync.question('Voulez-vous générer un fichier iCalendar pour une de ces réservations ? (oui/non) \n');
+        if (choix.toLowerCase() === 'oui') {
+            const index = parseInt(readlineSync.question('Entrez le numéro de la réservation pour laquelle générer le fichier iCalendar : \n'));
+            if (index > 0 && index <= reservations.length) {
+                const reservation = reservations[index - 1];
+                creerFichierIcs(reservation.salle, reservation.jour, reservation.horaire, identifiant);
+            } else {
+                console.log("Choix invalide.");
+            }
+        }
+    } else {
+        console.log("Aucune réservation trouvée.");
+    }
 }
 
 
@@ -147,5 +174,72 @@ var sallesDispoSelonHoraire = function(donnees, horaireRecherche, jour){
 
     return allSalles;
 }
+
+var annulerReservation = function(identifiant, nomSalle, jour, horaire, donnees) {
+    let reservationFound = false;
+
+    for (let i = 0; i < donnees.length; i++) {
+        let ue = donnees[i];
+        for (let j = 0; j < ue.creneaux.length; j++) {
+            let creneau = ue.creneaux[j];
+            if (creneau.groupe_cours === identifiant && creneau.salle === nomSalle && creneau.jour === jour && creneau.horaire === horaire) {
+                ue.creneaux.splice(j, 1);
+                reservationFound = true;
+                console.log("Réservation annulée avec succès.");
+                break;
+            }
+        }
+        if (reservationFound) {
+            break;
+        }
+    }
+
+    if (!reservationFound) {
+        console.log("Aucune réservation trouvée correspondant à ces détails.");
+    }
+};
+
+function creerFichierIcs(nomSalle, jour, horaire, identifiant) {
+    const [heureDebut, heureFin] = horaire.split('-').map(h => h.trim());
+    const [heure, minute] = heureDebut.split(':').map(h => parseInt(h, 10));
+
+    // Convertir le jour en une date (vous devrez définir une logique pour cela)
+    const date = convertirJourEnDate(jour);
+
+    const event = {
+        start: [date.getFullYear(), date.getMonth() + 1, date.getDate(), heure, minute],
+        end: [date.getFullYear(), date.getMonth() + 1, date.getDate(), ...heureFin.split(':').map(h => parseInt(h, 10))],
+        title: `Réservation de la salle ${nomSalle}`,
+        description: `Réservation effectuée par ${identifiant}`,
+        location: nomSalle,
+        status: 'CONFIRMED',
+        busyStatus: 'BUSY'
+    };
+
+    ics.createEvent(event, (error, value) => {
+        if (error) {
+            console.log(error);
+            return;
+        }
+
+        // Écrivez le fichier .ics ou envoyez-le à l'utilisateur
+        // Par exemple, enregistrer le fichier localement ou l'envoyer par email
+        fs.writeFileSync(`${identifiant}-${nomSalle}-reservation.ics`, value);
+    });
+}
+
+function convertirJourEnDate(jour) {
+    const jours = { "L": 1, "MA": 2, "ME": 3, "J": 4, "V": 5, "S": 6, "D": 0 };
+    const today = new Date();
+    const todayDayOfWeek = today.getDay();
+    const targetDayOfWeek = jours[jour];
+
+    let date = new Date(today);
+    date.setDate(today.getDate() + ((7 + targetDayOfWeek - todayDayOfWeek) % 7));
+
+    return date;
+}
+
+
 
 module.exports = {menuReservation};

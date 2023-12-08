@@ -14,7 +14,8 @@
     "caporal": "^1.4.0",
     "colors": "^1.4.0",
     "date-fns": "^2.30.0",
-
+    "ics": "^3.5.0",
+    "inquirer": "^9.2.12",
     "readline-sync": "^1.4.10",
     "requirer": "^0.0.4",
     "vega": "^5.17.0",
