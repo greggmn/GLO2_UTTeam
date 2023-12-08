@@ -1,4 +1,5 @@
 const fs = require('fs').promises;
+const fss = require('fs');
 const path = require('path');
 const CruParser = require('./CruParser');
 
@@ -57,6 +58,23 @@ function CRUification(data) {
             }
         }
     }
+
+    const filePath = './FichierExporte.cru';
+    fss.writeFile(filePath, '', (err) => {
+        if (err) {
+          console.error('Erreur lors de l\'effacement du fichier :', err);
+          return;
+        }
+      });
+
+    fss.writeFile(filePath, result, (err) => {
+        if (err) {
+          console.error('Erreur lors de l\'effacement du fichier :', err);
+          return;
+        }
+        console.log('Fichier généré avec succès');
+      }); 
+
     return result;
 }
 
@@ -65,3 +83,4 @@ module.exports = {
     importData,
     CRUification
 };
+

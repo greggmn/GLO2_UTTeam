@@ -259,5 +259,5 @@ function creerSalle(salle){
 //PourcentageOccupation();
 //listerDisponibilitesSalle();
 //sallesDispoSelonHoraire();
-creerSalle()
+
 module.exports= {sallesDispoSelonHoraire, PourcentageOccupation, listerDisponibilitesSalle, calculateHoursBetween, calculateTotalHoursAvailable, calculateTotalOccupiedHours, creerSalle};

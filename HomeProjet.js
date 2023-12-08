@@ -41,6 +41,7 @@ const actionAFaireAdmin = [
             "créer une salle",
             "exporter un emploi du temps",
             "importer un emploi du temps",
+            "exporter au format Cru",
             "exit"
           ],
     },
@@ -106,7 +107,6 @@ async function runMenu(){
                     const room = "Presse Enter + Entrez le nom de la salle:\n"
                     const salle = readlineSync.question(room);
                     creerSalle(salle)
-
                 }
                 break;
             case "exporter un emploi du temps":
@@ -128,11 +128,21 @@ async function runMenu(){
                     console.log("Vous n'avez pas accès à cette fonction");
                 }
                 else{
-                    const ques3 = "Presse Enter + Entrez le nom du fichier a importer\n"
+                    const ques3 = "Presse Enter + Entrez le nom du fichier a importer\n";
                     const filename = readlineSync.question(ques3);
         
-                    importData(filename)
+                    importData(filename);
                 }
+                break;
+            //spec 10
+            case "exporter au format Cru":
+                if (statut !== "administrateur"){
+                    console.log("Vous n'avez pas accès à cette fonction");
+                }
+                else{
+                    CRUification(donnees);
+                }
+                
                 break;
     
             case "exit":
