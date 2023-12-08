@@ -1,75 +1,57 @@
-### README - Verbose POI Format (VPF) Parser - TP GL02
+### README - Projet GL02 Sujet A - UTTeam
 
-Description : Offer a recursive descent parser implemented in Javascript for reading and processing the Verbose POI Format (VPF). This format allows to describe any list of Point of Interest (POI) with an associated list of evaluation. The files are in text format and should respect the following grammar.
+Description : Délivrer un utilitaire en invite de commande pour faciliter la gestion des locaux de la SRU ainsi que l'organisation de ses usagers (enseignants et étudiants) en leur proposant un outil de suivi d'occupation des salles de cours. Donner la possibilité de réaliser un export de l'emploi du temps au format CRU.
 
-<liste_poi> = *(<poi> <eol>) "$$"
-<poi> = "START_POI" <eol> <body> "END_POI"
-<body> = <name> <eol> <latlng> <eol> <optional>
-<optional> = *(<note> <eol>)
-<name> = "name: " 1*WCHAR
-<latlng> = "latlng: " ?"-" 1*3DIGIT "." 1*DIGIT ";" ?"-" 1*3DIGIT "." 1*DIGIT
-<note> = "note: " "0"/"1"/"2"/"3"/"4"/"5"
-<eol> = CRLF
+Format CRU: 
+UE = code 1*creneau
+code = “+” 2ALPHA 2DIGIT CRLF; Donne le code de l’UE
+creneau = “1” “,” type “,”nbplaces“,” jour “,” horaire “,” groupe_cours “,” salle “//” CRLF; Permet d’avoir les données sur les salles réservées pour ce cours
+type = (“C”/”D”/”T’) %x31-39 1DIGIT
+nbplaces = “P=” 2*3DIGIT; Capacité de la salle
+jour = “H=” (“L”/”MA”/”ME”/”J”/”V”/”S”) WSP; Jour de la semaine où le cours se déroule
+horaire = 1*2DIGIT “:” 2DIGIT “-” 1*2DIGIT “:” 2DIGIT;1*2DIGIT = 1 ou 2 chiffres, définit l’horaire du groupe
+groupe_cours = “F” 1DIGIT
+salle = “S= (1ALPHA 3DIGIT)/(%s”EXT” 1DIGIT); Permet de connaître la salle où se déroule le cours
 
 ### Installation
 
 $ npm install
+$ npm install inquirer  
 
 ### Utilisation :
 
-$ node caporalCli.js <command> fileToParse [-hts]
+$ node HomeProjet.js
 
-<command> : check
-
--h or --help 	:	 display the program help
--t or --showTokenize :	 display the tokenization result 
--s or --showSymbols :	 display each step of the analysis
-
-Optional parameters have to be before the mandatory file parameter.
+Le programme prend en compte l'ensemble des fichiers CRU présents dans le dossier ./SujetA_data
 
 ### Version : 
 
-# 0.07
-
-- Caporal 2.0 Migration.
-
-# 0.06
-
-- Add vega-lite visualization and export.
-
 # 0.05
 
-- Utilisation du framework Caporal.js pour g�rer la cli
+- Utilisation de la librairie Inquirer pour améliorer le menu
 
 # 0.04
 
-- D�couplage CLI dans module � part : cli.js
-- Refactoring POI et VpfParser
+- Ajout de l'export au format CRU et ICalendar
 
 # 0.03
 
-- Ajout d'une option help permettant de lire le readme depuis la console
-- Ajout d'un mode verbose pour suivre l'action du parser
+- Ajout du système de réservation de salle adapté au statut de l'utilisateur
+- Ajout de la visualisation des salles disponibles et du taux d'occupation des salles
 
 # 0.02
 
-- Prise en charge des notes
-- Construction d'une liste d'objet POI afin de permettre des traitement ult�rieur
+- Développement de la page HomeProjet.js qui gère le menu du projet
 
 # 0.01
 
-- Parse enti�rement les fichiers simples du jeu de test (mais termine avec une erreur)
-- Prise en compte des noms de POI s'ils ne comportent pas d'espaces
-
-TODO :
-
-- Modification de la grammaire (� v�rifier)
-- Ajout de tests unitaires ./test/unit (qunit - lancer avec testRunner.js) - � compl�ter.
-
-- Ajout d'une option pour afficher chaque POI avec sa note moyenne
+- Développement du parser adapté au format CRU
+- Création des classes UE et Creneau (une Ue possède plusieurs créneaux)
 
 
 ### Liste des contributeurs
-M. Tixier (matthieu.tixier@utt.fr)
-
+Théo KOEHLER (theo.koehler@utt.fr)
+Lucas RUBAGOTTI (lucas.rubagotti@utt.fr)
+Mathys LEMORT (mathys.lemort@utt.fr)
+Gregoire GAUMAIN (gregoire.gaumain@utt.fr)
 

@@ -93,10 +93,10 @@ async function runMenu(){
                 }
                 else{
                     const ques = "Presse Enter + Entrez le path de l'emploi du temps (ex: SujetA_data\\edt1.cru):\n"
-                const ques2 ="Entrez le path du fichier dans lequel vous voulez exporter (ex: Export):\n"
-                const fileName = readlineSync.question(ques);
-                const folderName = readlineSync.question(ques2);
-                exportData(fileName,folderName)
+                    const ques2 ="Entrez le path du fichier dans lequel vous voulez exporter (ex: Export):\n"
+                    const fileName = readlineSync.question(ques);
+                    const folderName = readlineSync.question(ques2);
+                    exportData(fileName,folderName)
                 }
                 
                 break;
