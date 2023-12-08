@@ -24,6 +24,9 @@ $ node HomeProjet.js
 
 Le programme prend en compte l'ensemble des fichiers CRU présents dans le dossier ./SujetA_data
 
+Attention!:
+Il est possible lors de la saisie au clavier d'éléments que le programme nécessite de rentrer deux fois l'information.
+
 ### Version : 
 
 # 0.05
